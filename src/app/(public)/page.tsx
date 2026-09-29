@@ -16,7 +16,7 @@ export default function LandingPage() {
         </h1>
 
         <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Solusi terpadu bagi agensi dan brand untuk kurasi talent SPG & Usher dengan keamanan data standar UU PDP, face match otomatis, dan absensi geofence di lokasi penugasan.
+          Solusi terpadu bagi agensi dan brand untuk kurasi talent SPG & Usher dengan keamanan data dan absensi geofence di lokasi penugasan.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-3">
