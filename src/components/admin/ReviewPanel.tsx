@@ -73,131 +73,176 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
   const { talent, video } = verification;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              {talent.fullName}
-            </h1>
-            <Badge
-              variant={
-                currentDecision === "APPROVED"
-                  ? "success"
-                  : currentDecision === "REJECTED"
-                  ? "danger"
-                  : "warning"
-              }
-            >
-              {currentDecision}
-            </Badge>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/90 shadow-2xs">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center font-bold text-lg shrink-0">
+            {talent.fullName.charAt(0)}
           </div>
-          <p className="text-xs text-zinc-500 mt-1">
-            {talent.user.email} • {talent.phone} • Domisili: {talent.city} • Percobaan ke-
-            {verification.attemptNo}
-          </p>
+          <div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-xl font-bold text-slate-900">
+                {talent.fullName}
+              </h1>
+              <Badge
+                variant={
+                  currentDecision === "APPROVED"
+                    ? "success"
+                    : currentDecision === "REJECTED"
+                    ? "danger"
+                    : "warning"
+                }
+              >
+                {currentDecision}
+              </Badge>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                Percobaan #{verification.attemptNo}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-1">
+              {talent.user.email} • {talent.phone} • Domisili: <strong className="text-slate-700">{talent.city}</strong>
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {verification.flags.map((f, i) => (
-            <Badge key={i} variant="warning">
-              {f}
+        <div className="flex items-center gap-2 flex-wrap">
+          {verification.flags.length > 0 ? (
+            verification.flags.map((f, i) => (
+              <Badge key={i} variant="warning">
+                ⚠️ {f}
+              </Badge>
+            ))
+          ) : (
+            <Badge variant="success">
+              ✓ Rekognition Bersih
             </Badge>
-          ))}
+          )}
         </div>
       </div>
 
       {/* Side-by-side Evidence Photos & AI Scores */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* KTP */}
-        <Card>
-          <CardHeader className="py-3">
+        <Card className="border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <CardHeader className="py-3.5 border-b border-slate-100">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold">1. Foto KTP</span>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                </svg>
+                1. Dokumen KTP
+              </div>
               <Badge variant={verification.nikValid ? "success" : "danger"}>
-                {verification.nikValid ? "NIK Valid" : "Format NIK Invalid"}
+                {verification.nikValid ? "NIK Valid (16 Digits)" : "NIK Invalid"}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
-            <div className="aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 rounded-lg overflow-hidden flex items-center justify-center">
-              <span className="text-xs text-zinc-400">
-                [KTP Path: {verification.ktpPath}]
+          <CardContent className="p-4 flex-1 flex flex-col justify-between">
+            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 border border-slate-200 text-center">
+              <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              <span className="text-[11px] font-mono text-slate-600 break-all">
+                {verification.ktpPath}
               </span>
+              <span className="text-[10px] text-slate-400 mt-1">Enkripsi AES-256 Terlindungi</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Selfie */}
-        <Card>
-          <CardHeader className="py-3">
+        <Card className="border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <CardHeader className="py-3.5 border-b border-slate-100">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold">2. Foto Selfie Pendaftar</span>
-              <span className="text-xs font-bold text-blue-600">
-                Match KTP: {verification.matchKtpSelfie ? `${verification.matchKtpSelfie.toFixed(1)}%` : "N/A"}
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                2. Foto Selfie Pendaftar
+              </div>
+              <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                Match: {verification.matchKtpSelfie ? `${verification.matchKtpSelfie.toFixed(1)}%` : "N/A"}
               </span>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
-            <div className="aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 rounded-lg overflow-hidden flex items-center justify-center">
-              <span className="text-xs text-zinc-400">
-                [Selfie Path: {verification.selfiePath}]
+          <CardContent className="p-4 flex-1 flex flex-col justify-between">
+            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 border border-slate-200 text-center">
+              <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <span className="text-[11px] font-mono text-slate-600 break-all">
+                {verification.selfiePath}
               </span>
+              <span className="text-[10px] text-slate-400 mt-1">Rekognition Face Compare Reference</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Video Casting Frame */}
-        <Card>
-          <CardHeader className="py-3">
+        <Card className="border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <CardHeader className="py-3.5 border-b border-slate-100">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold">3. Frame Video Casting</span>
-              <span className="text-xs font-bold text-emerald-600">
-                Match Selfie: {verification.matchVideoSelfie ? `${verification.matchVideoSelfie.toFixed(1)}%` : "N/A"}
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
+                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                3. Video Casting (Liveness)
+              </div>
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                Match: {verification.matchVideoSelfie ? `${verification.matchVideoSelfie.toFixed(1)}%` : "N/A"}
               </span>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
-            <div className="aspect-[4/3] bg-zinc-100 dark:bg-zinc-800 rounded-lg overflow-hidden flex items-center justify-center">
-              <span className="text-xs text-zinc-400">
-                {video ? `[Video: ${video.durationSec}s | ${video.width}x${video.height}]` : "Tidak ada video"}
+          <CardContent className="p-4 flex-1 flex flex-col justify-between">
+            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 border border-slate-200 text-center">
+              <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-[11px] font-mono text-slate-600">
+                {video ? `${video.durationSec}s • ${video.width}x${video.height}px` : "Belum diunggah"}
               </span>
+              <span className="text-[10px] text-slate-400 mt-1">Liveness Video Verification</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Talent Specification */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Spesifikasi & Pengalaman Talent</CardTitle>
+      <Card className="border-slate-200/90 shadow-2xs">
+        <CardHeader className="border-b border-slate-100 pb-3">
+          <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <span className="w-1.5 h-3.5 bg-blue-600 rounded-full"></span>
+            Spesifikasi Fisik & Pengalaman Talent
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-            <div>
-              <span className="text-zinc-500">Kategori:</span>
-              <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-0.5">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Kategori Talent:</span>
+              <p className="font-bold text-slate-900 text-sm mt-0.5">
                 {talent.category}
               </p>
             </div>
-            <div>
-              <span className="text-zinc-500">Tinggi / Berat:</span>
-              <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-0.5">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Tinggi / Berat:</span>
+              <p className="font-bold text-slate-900 text-sm mt-0.5">
                 {talent.heightCm} cm / {talent.weightKg} kg
               </p>
             </div>
-            <div>
-              <span className="text-zinc-500">Tempat, Tanggal Lahir:</span>
-              <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-0.5">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Kelahiran:</span>
+              <p className="font-bold text-slate-900 text-sm mt-0.5">
                 {talent.birthPlace},{" "}
                 {new Date(talent.birthDate).toLocaleDateString("id-ID")}
               </p>
             </div>
-            <div>
-              <span className="text-zinc-500">Pengalaman:</span>
-              <p className="font-semibold text-zinc-800 dark:text-zinc-200 mt-0.5">
-                {talent.experience || "-"}
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Pengalaman:</span>
+              <p className="font-bold text-slate-900 text-sm mt-0.5 line-clamp-2">
+                {talent.experience || "Fresh Talent"}
               </p>
             </div>
           </div>
@@ -205,42 +250,73 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
       </Card>
 
       {/* Decision Box */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Keputusan Verifikasi (Human Reviewer)</CardTitle>
+      <Card className="border-slate-200/90 shadow-2xs">
+        <CardHeader className="border-b border-slate-100 pb-3">
+          <CardTitle className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <span className="w-1.5 h-3.5 bg-blue-600 rounded-full"></span>
+            Keputusan Kurasi Verifikasi (Human Reviewer)
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-4">
           <div>
-            <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-              Catatan Review (akan dikirimkan ke email talent)
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              Catatan Review Administrator (dikirimkan otomatis via notifikasi email)
             </label>
             <textarea
-              className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
               rows={3}
-              placeholder="Contoh: KTP sedikit buram namun wajah cocok dengan video perkenalan..."
+              placeholder="Contoh: Seluruh berkas KTP, selfie, dan video perkenalan telah diverifikasi dan memenuhi standar agensi..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
+
+            {/* Quick Note Templates */}
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <span className="text-[11px] text-slate-400 font-medium">Template Cepat:</span>
+              <button
+                type="button"
+                onClick={() => setNote("Berkas identitas dan perkenalan video telah diverifikasi valid dan memenuhi kriteria.")}
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              >
+                ✓ Verifikasi Valid
+              </button>
+              <button
+                type="button"
+                onClick={() => setNote("Foto KTP buram / tidak terbaca dengan jelas. Silakan unggah ulang KTP asli berorientasi horizontal.")}
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              >
+                ⚠️ KTP Buram
+              </button>
+              <button
+                type="button"
+                onClick={() => setNote("Kemiripan wajah pada selfie tidak sesuai dengan KTP. Harap unggah foto selfie terbaru tanpa filter.")}
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              >
+                ⚠️ Wajah Tidak Cocok
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
             <Button
               type="button"
               variant="danger"
               size="md"
+              className="font-bold shadow-xs"
               isLoading={submitting}
               onClick={() => handleDecision("REJECTED")}
             >
-              Tolak (Reject)
+              ✕ Tolak Pengajuan (Reject)
             </Button>
             <Button
               type="button"
               variant="primary"
               size="md"
+              className="font-bold shadow-xs"
               isLoading={submitting}
               onClick={() => handleDecision("APPROVED")}
             >
-              Setujui (Approve) & Kirim Email
+              ✓ Setujui (Approve) & Aktivasi Akun
             </Button>
           </div>
         </CardContent>

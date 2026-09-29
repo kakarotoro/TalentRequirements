@@ -32,15 +32,19 @@ export default async function TalentDashboardPage() {
     profile?.applications?.filter((app) => app.status === "CONFIRMED") || [];
 
   return (
-    <div className="space-y-8">
-      {/* Header Profile Greeting */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800">
+    <div className="space-y-8 animate-fade-in">
+      {/* Header Profile Greeting Card */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-            Halo, {profile?.fullName || user.email}!
-          </h1>
-          <p className="text-xs text-zinc-500 mt-1">
-            Status Akun:{" "}
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+              Selamat Datang, {profile?.fullName || user.email}!
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Status Verifikasi:
+            </span>
             <Badge
               variant={
                 status === "VERIFIED"
@@ -54,7 +58,7 @@ export default async function TalentDashboardPage() {
             >
               {status}
             </Badge>
-          </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -63,9 +67,13 @@ export default async function TalentDashboardPage() {
               Ubah Data Diri
             </Button>
           </Link>
-          {status === "VERIFIED" && (
+          {status === "VERIFIED" ? (
             <Link href="/events">
               <Button size="sm">Cari Lowongan Event</Button>
+            </Link>
+          ) : (
+            <Link href="/verification">
+              <Button size="sm">Verifikasi Dokumen</Button>
             </Link>
           )}
         </div>
@@ -73,41 +81,42 @@ export default async function TalentDashboardPage() {
 
       {/* Verification Status Warning / Action Banner */}
       {status === "DRAFT" && (
-        <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h4 className="font-semibold text-sm text-amber-900 dark:text-amber-200">
-              Lengkapi Verifikasi Akun Anda
+        <div className="p-6 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="space-y-1">
+            <h4 className="font-bold text-sm text-amber-900">
+              Lengkapi Berkas Verifikasi Akun Anda
             </h4>
-            <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-              Anda belum mengunggah foto KTP, selfie, atau video casting. Verifikasi akun diperlukan sebelum Anda dapat melamar pekerjaan event.
+            <p className="text-xs text-amber-800 leading-relaxed max-w-xl">
+              Akun Anda belum mengirimkan KTP, selfie, atau video casting. Verifikasi kurasi wajah otomatis diperlukan sebelum melamar pekerjaan event.
             </p>
           </div>
           <Link href={!profile ? "/profile" : "/verification"}>
-            <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white whitespace-nowrap">
-              {!profile ? "Lengkapi Profil" : "Mulai Verifikasi"}
+            <Button size="sm" className="bg-amber-700 hover:bg-amber-800 text-white whitespace-nowrap border-amber-800">
+              {!profile ? "Lengkapi Profil" : "Mulai Verifikasi Sekarang →"}
             </Button>
           </Link>
         </div>
       )}
 
       {status === "PENDING_REVIEW" && (
-        <div className="p-5 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800">
-          <h4 className="font-semibold text-sm text-sky-900 dark:text-sky-200">
-            ⏳ Verifikasi Sedang Ditinjau Tim Kurasi
+        <div className="p-6 rounded-2xl bg-blue-50/70 border border-blue-200 shadow-2xs">
+          <h4 className="font-bold text-sm text-blue-900 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
+            Verifikasi Sedang Ditinjau Tim Kurasi
           </h4>
-          <p className="text-xs text-sky-700 dark:text-sky-400 mt-1">
-            Pengajuan verifikasi Anda (percobaan #{latestVerification?.attemptNo}) sedang diproses. Anda akan menerima notifikasi email setelah hasil review selesai.
+          <p className="text-xs text-blue-800 mt-1 leading-relaxed">
+            Pengajuan verifikasi Anda (percobaan #{latestVerification?.attemptNo}) sedang diproses oleh human reviewer. Anda akan menerima notifikasi status verifikasi di dashboard ini.
           </p>
         </div>
       )}
 
       {status === "REJECTED" && (
-        <div className="p-5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-6 rounded-2xl bg-rose-50/70 border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
           <div>
-            <h4 className="font-semibold text-sm text-rose-900 dark:text-rose-200">
+            <h4 className="font-bold text-sm text-rose-900">
               Pengajuan Verifikasi Belum Disetujui
             </h4>
-            <p className="text-xs text-rose-700 dark:text-rose-400 mt-0.5">
+            <p className="text-xs text-rose-800 mt-1 leading-relaxed">
               Catatan Reviewer: {latestVerification?.reviewNote || "Foto KTP atau video perkenalan belum memenuhi kualifikasi."}
             </p>
           </div>
@@ -122,29 +131,35 @@ export default async function TalentDashboardPage() {
       {/* Confirmed / Today's Event Attendance Section */}
       {confirmedEvents.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-            Jadwal Penugasan Terkonfirmasi & Absensi
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-slate-900 tracking-tight">
+              Penugasan Terkonfirmasi & Absensi Live
+            </h3>
+            <span className="text-xs text-slate-500 font-medium">
+              {confirmedEvents.length} Event Aktif
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {confirmedEvents.map((app) => {
               const checkIn = app.attendances.find((a) => a.type === "CHECK_IN");
               const checkOut = app.attendances.find((a) => a.type === "CHECK_OUT");
 
               return (
-                <Card key={app.id} className="border-blue-200 dark:border-blue-900 shadow-sm">
+                <Card key={app.id} className="border-blue-200 hover-lift shadow-xs">
                   <CardHeader className="py-4">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-base">{app.event.title}</CardTitle>
+                      <CardTitle className="text-base text-slate-900">{app.event.title}</CardTitle>
                       <Badge variant="success">CONFIRMED</Badge>
                     </div>
-                    <p className="text-xs text-zinc-500 mt-1">
-                      {app.event.venueName} • {new Date(app.event.startsAt).toLocaleDateString("id-ID")}
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      📍 {app.event.venueName} • {new Date(app.event.startsAt).toLocaleDateString("id-ID")}
                     </p>
                   </CardHeader>
                   <CardContent className="pt-2 space-y-3">
-                    <div className="text-xs text-zinc-600 dark:text-zinc-400 flex justify-between">
-                      <span>Jam Acara:</span>
-                      <span className="font-medium">
+                    <div className="text-xs text-slate-600 flex justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                      <span>Jam Tugas:</span>
+                      <span className="font-semibold text-slate-900">
                         {new Date(app.event.startsAt).toLocaleTimeString("id-ID", {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -157,17 +172,17 @@ export default async function TalentDashboardPage() {
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                    <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                       <div className="text-xs">
                         Check-in:{" "}
                         {checkIn ? (
-                          <span className="text-emerald-600 font-semibold">Sudah Absen</span>
+                          <span className="text-emerald-700 font-bold">✓ Sudah Absen</span>
                         ) : (
-                          <span className="text-amber-600 font-semibold">Belum</span>
+                          <span className="text-amber-700 font-bold">Belum Absen</span>
                         )}
                       </div>
                       <Link href={`/attendance/${app.id}`}>
-                        <Button size="sm">Buka Halaman Absen</Button>
+                        <Button size="sm">Buka Presensi GPS</Button>
                       </Link>
                     </div>
                   </CardContent>
@@ -180,44 +195,44 @@ export default async function TalentDashboardPage() {
 
       {/* Recent Applications List */}
       <div className="space-y-4">
-        <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-          Riwayat Lamaran Event
+        <h3 className="text-base font-bold text-slate-900 tracking-tight">
+          Riwayat Lamaran Event Anda
         </h3>
 
         {!profile?.applications || profile.applications.length === 0 ? (
-          <div className="p-8 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-xs text-zinc-500">
+          <div className="p-8 text-center bg-white border border-slate-200/90 rounded-2xl text-xs text-slate-500 shadow-2xs">
             Anda belum melamar event apapun.{" "}
             {status === "VERIFIED" ? (
-              <Link href="/events" className="text-blue-600 underline font-medium">
-                Cari lowongan event sekarang
+              <Link href="/events" className="text-blue-700 font-bold underline ml-1">
+                Jelajahi lowongan event aktif
               </Link>
             ) : (
-              "Lengkapi verifikasi terlebih dahulu untuk mulai melamar."
+              "Selesaikan verifikasi berkas terlebih dahulu untuk mulai melamar."
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900">
-            <table className="w-full text-left text-xs text-zinc-600 dark:text-zinc-400">
-              <thead className="bg-zinc-50 dark:bg-zinc-800/60 uppercase text-[10px] text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800">
+          <div className="overflow-x-auto border border-slate-200/90 rounded-xl bg-white shadow-2xs">
+            <table className="w-full text-left text-xs text-slate-600">
+              <thead className="bg-slate-50 uppercase text-[10px] text-slate-500 font-bold border-b border-slate-200">
                 <tr>
                   <th className="px-4 py-3">Nama Event</th>
                   <th className="px-4 py-3">Klien</th>
-                  <th className="px-4 py-3">Tanggal</th>
+                  <th className="px-4 py-3">Tanggal Penugasan</th>
                   <th className="px-4 py-3">Status Lamaran</th>
                   <th className="px-4 py-3 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <tbody className="divide-y divide-slate-100">
                 {profile.applications.map((app) => (
-                  <tr key={app.id}>
-                    <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
+                  <tr key={app.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="px-4 py-3.5 font-bold text-slate-900">
                       {app.event.title}
                     </td>
-                    <td className="px-4 py-3">{app.event.clientName}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3.5 font-medium">{app.event.clientName}</td>
+                    <td className="px-4 py-3.5 text-slate-500">
                       {new Date(app.event.startsAt).toLocaleDateString("id-ID")}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3.5">
                       <Badge
                         variant={
                           app.status === "CONFIRMED"
@@ -232,12 +247,12 @@ export default async function TalentDashboardPage() {
                         {app.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <Link
                         href={`/events/${app.eventId}`}
-                        className="text-blue-600 hover:underline font-medium"
+                        className="text-blue-700 hover:text-blue-800 font-bold hover:underline"
                       >
-                        Lihat Detail
+                        Detail Event →
                       </Link>
                     </td>
                   </tr>

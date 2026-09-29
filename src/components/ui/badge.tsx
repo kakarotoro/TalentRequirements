@@ -2,7 +2,7 @@ import * as React from "react";
 
 export interface BadgeProps {
   children: React.ReactNode;
-  variant?: "success" | "warning" | "danger" | "info" | "neutral";
+  variant?: "success" | "warning" | "danger" | "info" | "neutral" | "primary";
   className?: string;
 }
 
@@ -12,21 +12,17 @@ export function Badge({
   className = "",
 }: BadgeProps) {
   const variants = {
-    success:
-      "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
-    warning:
-      "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-200 dark:border-amber-800",
-    danger:
-      "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border-rose-200 dark:border-rose-800",
-    info:
-      "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 border-sky-200 dark:border-sky-800",
-    neutral:
-      "bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700",
+    primary: "bg-blue-50 text-blue-800 border-blue-200/80 font-semibold",
+    success: "bg-emerald-50 text-emerald-800 border-emerald-200/80 font-medium",
+    warning: "bg-amber-50 text-amber-800 border-amber-200/80 font-medium",
+    danger: "bg-rose-50 text-rose-800 border-rose-200/80 font-medium",
+    info: "bg-sky-50 text-sky-800 border-sky-200/80 font-medium",
+    neutral: "bg-slate-100 text-slate-700 border-slate-200/80 font-medium",
   };
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${variants[variant]} ${className}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs border ${variants[variant]} ${className}`}
     >
       {children}
     </span>

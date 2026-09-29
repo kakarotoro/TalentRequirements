@@ -38,19 +38,29 @@ export default async function AttendancePage({
   );
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
-        <Link href="/dashboard" className="text-xs text-blue-600 hover:underline">
-          ← Kembali ke Dashboard
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Kembali ke Dashboard
         </Link>
       </div>
 
-      <div className="text-center space-y-1">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          Absensi Event: {application.event.title}
+      <div className="text-center space-y-2 pb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-xs font-semibold text-blue-700">
+          <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
+          Portal Kehadiran Mandiri Berbasis GPS & AI Face Verification
+        </div>
+        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          Presensi: {application.event.title}
         </h1>
-        <p className="text-xs text-zinc-500">
-          {application.event.venueName} • Radius batas: {application.event.radiusMeters}m
+        <p className="text-xs text-slate-500">
+          {application.event.venueName} • Toleransi Radius Geofence: {application.event.radiusMeters}m
         </p>
       </div>
 

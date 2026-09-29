@@ -16,7 +16,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+            className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5"
           >
             {label}
           </label>
@@ -24,16 +24,16 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           id={inputId}
           ref={ref}
-          className={`w-full px-3.5 py-2 text-sm rounded-lg border bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 transition-colors placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+          className={`w-full px-3.5 py-2.5 text-sm rounded-lg border bg-white text-slate-900 transition-all duration-150 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 ${
             error
-              ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-              : "border-zinc-300 dark:border-zinc-700"
+              ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-500"
+              : "border-slate-300 hover:border-slate-400"
           } ${className}`}
           {...props}
         />
-        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+        {error && <p className="mt-1.5 text-xs font-medium text-rose-600">{error}</p>}
         {helperText && !error && (
-          <p className="mt-1 text-xs text-zinc-500">{helperText}</p>
+          <p className="mt-1.5 text-xs text-slate-500">{helperText}</p>
         )}
       </div>
     );

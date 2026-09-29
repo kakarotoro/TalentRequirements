@@ -9,7 +9,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm ${className}`}
+      className={`bg-white border border-slate-200/90 rounded-xl shadow-xs transition-all duration-200 ${className}`}
     >
       {children}
     </div>
@@ -23,7 +23,11 @@ export function CardHeader({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={`px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 ${className}`}>{children}</div>;
+  return (
+    <div className={`px-6 py-4.5 border-b border-slate-100 ${className}`}>
+      {children}
+    </div>
+  );
 }
 
 export function CardTitle({
@@ -33,7 +37,11 @@ export function CardTitle({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <h3 className={`text-lg font-semibold text-zinc-900 dark:text-zinc-100 ${className}`}>{children}</h3>;
+  return (
+    <h3 className={`text-base font-bold text-slate-900 tracking-tight ${className}`}>
+      {children}
+    </h3>
+  );
 }
 
 export function CardContent({
@@ -53,5 +61,9 @@ export function CardFooter({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={`px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-t border-zinc-200 dark:border-zinc-800 rounded-b-xl ${className}`}>{children}</div>;
+  return (
+    <div className={`px-6 py-4 bg-slate-50/70 border-t border-slate-100 rounded-b-xl ${className}`}>
+      {children}
+    </div>
+  );
 }

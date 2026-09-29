@@ -48,34 +48,49 @@ export default function NewEventPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
-        <Link href="/admin/events" className="text-xs text-blue-600 hover:underline">
-          ← Kembali ke Kelola Event
+        <Link
+          href="/admin/events"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Kembali ke Kelola Event
         </Link>
       </div>
 
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          Buat Lowongan Event Baru
-        </h1>
-        <p className="text-xs text-zinc-500 mt-1">
-          Tentukan parameter lowongan, honor, jadwal, dan batas radius geofence absensi.
+      <div className="pb-2 border-b border-slate-200">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
+            Buat Lowongan Penugasan Baru
+          </h1>
+        </div>
+        <p className="text-xs text-slate-500 mt-1">
+          Tentukan parameter lowongan, honor, jadwal, dan batas radius geofence absensi di lokasi penugasan.
         </p>
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-          {error}
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+          <svg className="w-4 h-4 shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{error}</span>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>1. Informasi Umum Event</CardTitle>
+        <Card className="border-slate-200/90 shadow-2xs">
+          <CardHeader className="border-b border-slate-100 pb-3">
+            <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center text-xs font-bold">1</span>
+              Informasi Umum Penugasan
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Nama / Judul Event"
@@ -94,12 +109,13 @@ export default function NewEventPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 Deskripsi Pekerjaan
               </label>
               <textarea
-                className="w-full px-3.5 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
                 rows={3}
+                placeholder="Jelaskan ruang lingkup pekerjaan dan tanggung jawab talent di booth..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
@@ -107,11 +123,11 @@ export default function NewEventPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Kategori Talent
                 </label>
                 <select
-                  className="w-full px-3.5 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 font-medium"
                   value={formData.category}
                   onChange={(e) =>
                     setFormData({
@@ -120,9 +136,9 @@ export default function NewEventPage() {
                     })
                   }
                 >
-                  <option value="SPG">SPG (Sales Promotion)</option>
-                  <option value="USHER">Usher (Penerima Tamu)</option>
-                  <option value="BOTH">Keduanya</option>
+                  <option value="SPG">SPG (Sales Promotion Girl)</option>
+                  <option value="USHER">Usher (Penerima Tamu VIP)</option>
+                  <option value="BOTH">Keduanya (SPG & Usher)</option>
                 </select>
               </div>
 
@@ -145,14 +161,17 @@ export default function NewEventPage() {
         </Card>
 
         {/* 2. Lokasi & Geofence */}
-        <Card>
-          <CardHeader>
-            <CardTitle>2. Lokasi Venue & Geofence Absensi</CardTitle>
-            <p className="text-xs text-zinc-500 mt-1">
-              Koordinat ini digunakan server untuk memvalidasi jarak saat talent melakukan selfie absensi (Haversine distance).
+        <Card className="border-slate-200/90 shadow-2xs">
+          <CardHeader className="border-b border-slate-100 pb-3">
+            <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center text-xs font-bold">2</span>
+              Lokasi Venue & Geofence Absensi
+            </CardTitle>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Titik koordinat divalidasi dengan server menggunakan rumus Haversine saat talent mengirim absensi selfie.
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Nama Venue / Tempat"
@@ -200,11 +219,14 @@ export default function NewEventPage() {
         </Card>
 
         {/* 3. Waktu & Durasi */}
-        <Card>
-          <CardHeader>
-            <CardTitle>3. Jadwal Waktu & Absensi</CardTitle>
+        <Card className="border-slate-200/90 shadow-2xs">
+          <CardHeader className="border-b border-slate-100 pb-3">
+            <CardTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center text-xs font-bold">3</span>
+              Jadwal Waktu & Persyaratan
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
                 label="Waktu Mulai Event"
@@ -236,11 +258,11 @@ export default function NewEventPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                Persyaratan Kualifikasi Talent
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Kualifikasi & Persyaratan Khusus Talent
               </label>
               <textarea
-                className="w-full px-3.5 py-2 text-sm rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
                 rows={2}
                 value={formData.requirements}
                 onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
@@ -249,9 +271,9 @@ export default function NewEventPage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end gap-3">
-          <Button type="submit" size="lg" isLoading={loading}>
-            Simpan & Publikasikan Event
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="submit" size="lg" className="font-bold shadow-xs" isLoading={loading}>
+            ✓ Simpan & Publikasikan Event
           </Button>
         </div>
       </form>

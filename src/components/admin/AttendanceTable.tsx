@@ -55,53 +55,59 @@ export function AttendanceTable({ attendances }: AttendanceTableProps) {
   };
 
   return (
-    <div className="overflow-x-auto border border-zinc-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-900">
-      <table className="w-full text-left text-xs text-zinc-600 dark:text-zinc-400">
-        <thead className="bg-zinc-50 dark:bg-zinc-800/60 uppercase text-[10px] text-zinc-500 font-semibold border-b border-zinc-200 dark:border-zinc-800">
+    <div className="overflow-x-auto border border-slate-200/90 rounded-2xl bg-white shadow-2xs">
+      <table className="w-full text-left text-xs text-slate-600">
+        <thead className="bg-slate-50 uppercase text-[10px] font-bold text-slate-500 border-b border-slate-200">
           <tr>
-            <th className="px-4 py-3">Talent</th>
-            <th className="px-4 py-3">Tipe</th>
-            <th className="px-4 py-3">Waktu Server</th>
-            <th className="px-4 py-3">Jarak</th>
-            <th className="px-4 py-3">Face Match</th>
-            <th className="px-4 py-3">Keterlambatan</th>
-            <th className="px-4 py-3">Status</th>
-            <th className="px-4 py-3">Flags</th>
-            <th className="px-4 py-3 text-right">Aksi</th>
+            <th className="px-5 py-3.5">Talent</th>
+            <th className="px-4 py-3.5">Tipe</th>
+            <th className="px-4 py-3.5">Waktu Server</th>
+            <th className="px-4 py-3.5">Jarak Venue</th>
+            <th className="px-4 py-3.5">Face Match</th>
+            <th className="px-4 py-3.5">Ketepatan</th>
+            <th className="px-4 py-3.5">Status</th>
+            <th className="px-4 py-3.5">Flags</th>
+            <th className="px-5 py-3.5 text-right">Aksi</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <tbody className="divide-y divide-slate-100">
           {attendances.length === 0 ? (
             <tr>
-              <td colSpan={9} className="px-4 py-8 text-center text-zinc-500">
+              <td colSpan={9} className="px-5 py-10 text-center text-slate-400">
                 Belum ada absensi yang tercatat untuk event ini.
               </td>
             </tr>
           ) : (
             attendances.map((item) => (
-              <tr key={item.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30">
-                <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
+              <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
+                <td className="px-5 py-3.5 font-bold text-slate-900">
                   {item.application.talent.fullName}
-                  <div className="text-[10px] text-zinc-500">{item.application.talent.phone}</div>
+                  <div className="text-[11px] text-slate-400 font-normal">{item.application.talent.phone}</div>
                 </td>
-                <td className="px-4 py-3 font-semibold">{item.type}</td>
-                <td className="px-4 py-3">
-                  {new Date(item.serverTimestamp).toLocaleTimeString("id-ID")}
+                <td className="px-4 py-3.5">
+                  <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${item.type === "CHECK_IN" ? "bg-blue-50 text-blue-700 border border-blue-200" : "bg-indigo-50 text-indigo-700 border border-indigo-200"}`}>
+                    {item.type}
+                  </span>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5 text-slate-700 font-medium">
+                  {new Date(item.serverTimestamp).toLocaleTimeString("id-ID")} WIB
+                </td>
+                <td className="px-4 py-3.5 text-slate-700">
                   {item.distanceMeters !== null ? `${item.distanceMeters} m` : "-"}
                 </td>
-                <td className="px-4 py-3">
-                  {item.matchScore ? `${item.matchScore.toFixed(1)}%` : "-"}
+                <td className="px-4 py-3.5 font-medium">
+                  {item.matchScore ? (
+                    <span className="text-blue-700 font-bold">{item.matchScore.toFixed(1)}%</span>
+                  ) : "-"}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5">
                   {item.isLate ? (
-                    <span className="text-rose-600 font-semibold">Terlambat</span>
+                    <span className="text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded text-[11px] font-bold">Terlambat</span>
                   ) : (
-                    <span className="text-emerald-600">Tepat Waktu</span>
+                    <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-bold">Tepat Waktu</span>
                   )}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5">
                   <Badge
                     variant={
                       item.status === "VALID"
@@ -114,29 +120,29 @@ export function AttendanceTable({ attendances }: AttendanceTableProps) {
                     {item.status}
                   </Badge>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5">
                   {item.flags.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {item.flags.map((f, i) => (
                         <span
                           key={i}
-                          className="px-1.5 py-0.5 text-[10px] rounded bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                          className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-amber-50 border border-amber-200 text-amber-800"
                         >
                           {f}
                         </span>
                       ))}
                     </div>
                   ) : (
-                    "-"
+                    <span className="text-slate-400">-</span>
                   )}
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-5 py-3.5 text-right">
                   <button
                     onClick={() => {
                       setSelectedItem(item);
                       setAdminNote(item.adminNote || "");
                     }}
-                    className="text-xs text-blue-600 hover:underline font-medium"
+                    className="text-xs font-semibold text-blue-700 hover:text-blue-800 transition-colors"
                   >
                     Koreksi
                   </button>
@@ -149,18 +155,23 @@ export function AttendanceTable({ attendances }: AttendanceTableProps) {
 
       {/* Correction Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-xl p-6 max-w-md w-full border border-zinc-200 dark:border-zinc-800 space-y-4">
-            <h4 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
-              Koreksi Absensi: {selectedItem.application.talent.fullName} ({selectedItem.type})
-            </h4>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-slate-200 shadow-xl space-y-4 animate-fade-in">
+            <div>
+              <h4 className="font-bold text-base text-slate-900">
+                Koreksi Manual Absensi
+              </h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {selectedItem.application.talent.fullName} • Presensi {selectedItem.type}
+              </p>
+            </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-                Catatan Koreksi Admin
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Catatan Justifikasi Reviewer
               </label>
               <textarea
-                className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900"
+                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
                 rows={3}
                 value={adminNote}
                 onChange={(e) => setAdminNote(e.target.value)}
@@ -168,7 +179,7 @@ export function AttendanceTable({ attendances }: AttendanceTableProps) {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
               <Button
                 type="button"
                 variant="ghost"
@@ -181,6 +192,7 @@ export function AttendanceTable({ attendances }: AttendanceTableProps) {
                 type="button"
                 variant="danger"
                 size="sm"
+                className="font-bold"
                 isLoading={submitting}
                 onClick={() => handleCorrect("REJECTED")}
               >
@@ -190,10 +202,11 @@ export function AttendanceTable({ attendances }: AttendanceTableProps) {
                 type="button"
                 variant="primary"
                 size="sm"
+                className="font-bold shadow-xs"
                 isLoading={submitting}
                 onClick={() => handleCorrect("VALID")}
               >
-                Jadikan Valid
+                Setujui (Valid)
               </Button>
             </div>
           </div>
