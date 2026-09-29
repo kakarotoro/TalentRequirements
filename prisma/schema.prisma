@@ -1,0 +1,305 @@
+// Skema database: Platform Rekrutmen & Absensi SPG / Usher
+// Stack: PostgreSQL (Supabase) + Prisma
+// Login/auth dikelola Supabase Auth; tabel User di bawah ini memakai id yang sama dengan auth.users.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled connection (runtime)
+  directUrl = env("DIRECT_URL")   // direct connection (migrasi)
+}
+
+// ───────────────────────── ENUM ─────────────────────────
+
+enum Role {
+  TALENT
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum TalentCategory {
+  SPG
+  USHER
+  BOTH
+}
+
+enum TalentStatus {
+  DRAFT          // data belum lengkap / belum submit
+  PENDING_REVIEW // sudah submit, menunggu keputusan admin
+  VERIFIED
+  REJECTED
+  INACTIVE
+}
+
+enum ReviewDecision {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum VideoValidation {
+  PENDING
+  PASSED
+  FLAGGED // lolos format, tapi ada catatan (mis. wajah/tubuh tidak terdeteksi)
+  FAILED
+}
+
+enum EventStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  ONGOING
+  DONE
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  CONFIRMED
+  REJECTED
+  CANCELLED
+}
+
+enum AttendanceType {
+  CHECK_IN
+  CHECK_OUT
+}
+
+enum AttendanceStatus {
+  VALID
+  NEEDS_REVIEW // di luar radius, face match rendah, EXIF janggal, dll.
+  REJECTED
+}
+
+// ───────────────────────── USER & PROFIL ─────────────────────────
+
+model User {
+  id        String   @id @db.Uuid // = auth.users.id (Supabase)
+  email     String   @unique
+  role      Role     @default(TALENT)
+  createdAt DateTime @default(now())
+
+  talent         TalentProfile?
+  eventsCreated  Event[]        @relation("EventCreator")
+  reviewsDone    Verification[] @relation("VerificationReviewer")
+  applicationsDecided Application[] @relation("ApplicationDecider")
+  attendancesReviewed Attendance[]  @relation("AttendanceReviewer")
+  auditLogs      AuditLog[]
+}
+
+model TalentProfile {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Identitas
+  fullName     String
+  nikEncrypted String   // AES-256-GCM; jangan simpan NIK polos
+  nikHash      String   @unique // HMAC-SHA256(NIK, pepper) -> cek 1 NIK = 1 akun tanpa dekripsi
+  birthPlace   String
+  birthDate    DateTime @db.Date
+  gender       Gender
+  phone        String
+  city         String   // domisili
+  instagram    String?
+
+  // Data fisik & profesional
+  category     TalentCategory
+  heightCm     Int
+  weightKg     Int
+  clothingSize String?
+  shoeSize     Int?
+  experience   String?  @db.Text
+  languages    String[]
+  specialNotes String?  @db.Text // ciri khusus relevan untuk kebutuhan klien (opsional)
+
+  status         TalentStatus @default(DRAFT)
+  consentAt      DateTime?    // persetujuan pemrosesan data pribadi (UU PDP)
+  consentVersion String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  verifications Verification[]
+  applications  Application[]
+
+  @@index([status])
+  @@index([city])
+}
+
+// ───────────────────────── VERIFIKASI ─────────────────────────
+// Satu baris = satu percobaan submit (KTP + selfie + video). Riwayat percobaan tetap tersimpan.
+
+model Verification {
+  id        String        @id @default(uuid()) @db.Uuid
+  talentId  String        @db.Uuid
+  talent    TalentProfile @relation(fields: [talentId], references: [id], onDelete: Cascade)
+  attemptNo Int           @default(1)
+
+  // Path file di Supabase Storage (bucket privat)
+  ktpPath    String
+  selfiePath String
+
+  // Hasil pengecekan otomatis (rekomendasi untuk admin, bukan keputusan final)
+  nikValid       Boolean  @default(false) // struktur NIK valid & konsisten dengan data diri
+  ocrMatch       Boolean? // nama/NIK/tgl lahir hasil OCR cocok dengan input
+  matchKtpSelfie   Float? // similarity 0-100 (Rekognition)
+  matchVideoSelfie Float?
+  duplicateOfTalentId String? @db.Uuid // wajah mirip akun lain
+  flags          String[] // mis. ["LOW_MATCH", "OCR_MISMATCH", "MULTIPLE_FACES"]
+
+  // Keputusan admin (final)
+  decision     ReviewDecision @default(PENDING)
+  reviewNote   String?        @db.Text
+  reviewedById String?        @db.Uuid
+  reviewedBy   User?          @relation("VerificationReviewer", fields: [reviewedById], references: [id])
+  reviewedAt   DateTime?
+
+  submittedAt DateTime @default(now())
+
+  video CastingVideo?
+
+  @@unique([talentId, attemptNo])
+  @@index([decision, submittedAt])
+}
+
+model CastingVideo {
+  id             String       @id @default(uuid()) @db.Uuid
+  verificationId String       @unique @db.Uuid
+  verification   Verification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+
+  storagePath String
+  framePaths  String[] // frame JPEG (perkenalan + pose depan) diambil di klien untuk face match
+  durationSec Float
+  width       Int
+  height      Int
+  sizeBytes   Int
+
+  validation      VideoValidation @default(PENDING)
+  validationFlags String[]        // mis. ["NOT_PORTRAIT", "NO_FULL_BODY", "NO_FACE"]
+
+  uploadedAt DateTime @default(now())
+}
+
+// ───────────────────────── EVENT & LAMARAN ─────────────────────────
+
+model Event {
+  id          String  @id @default(uuid()) @db.Uuid
+  title       String
+  clientName  String
+  description String? @db.Text
+
+  venueName String
+  address   String
+  latitude  Float
+  longitude Float
+  radiusMeters Int @default(100) // geofence absensi
+
+  startsAt DateTime
+  endsAt   DateTime
+  checkInOpensMinutesBefore Int @default(60) // absen dibuka X menit sebelum event
+
+  requiredCount Int
+  category      TalentCategory
+  fee           Int?           // honor per talent (Rupiah), opsional
+  requirements  String?        @db.Text
+
+  status      EventStatus @default(DRAFT)
+  createdById String      @db.Uuid
+  createdBy   User        @relation("EventCreator", fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications Application[]
+
+  @@index([status, startsAt])
+}
+
+model Application {
+  id       String            @id @default(uuid()) @db.Uuid
+  eventId  String            @db.Uuid
+  event    Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  talentId String            @db.Uuid
+  talent   TalentProfile     @relation(fields: [talentId], references: [id], onDelete: Cascade)
+  status   ApplicationStatus @default(APPLIED)
+
+  appliedAt   DateTime @default(now())
+  decidedAt   DateTime?
+  decidedById String?   @db.Uuid
+  decidedBy   User?     @relation("ApplicationDecider", fields: [decidedById], references: [id])
+
+  attendances Attendance[]
+
+  @@unique([eventId, talentId]) // 1 talent hanya bisa apply 1x per event
+  @@index([talentId])
+  @@index([eventId, status])
+}
+
+// ───────────────────────── ABSENSI ─────────────────────────
+
+model Attendance {
+  id            String         @id @default(uuid()) @db.Uuid
+  applicationId String         @db.Uuid
+  application   Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  type          AttendanceType
+
+  serverTimestamp DateTime @default(now()) // dari server, tidak bisa diubah talent
+
+  // Lokasi (Geolocation API di browser)
+  latitude       Float
+  longitude      Float
+  accuracyMeters Float?
+  distanceMeters Float? // jarak ke lokasi event (dihitung server)
+
+  // Selfie diunggah manual
+  selfiePath  String
+  matchScore  Float?    // similarity vs selfie terverifikasi
+  exifTakenAt DateTime? // waktu pengambilan foto dari metadata (indikator tambahan)
+
+  isLate Boolean          @default(false)
+  status AttendanceStatus @default(VALID)
+  flags  String[]         // mis. ["OUT_OF_RADIUS", "LOW_MATCH", "EXIF_MISMATCH", "LOW_GPS_ACCURACY"]
+
+  // Koreksi/review admin
+  adminNote    String?   @db.Text
+  reviewedById String?   @db.Uuid
+  reviewedBy   User?     @relation("AttendanceReviewer", fields: [reviewedById], references: [id])
+  reviewedAt   DateTime?
+
+  @@unique([applicationId, type]) // 1 check-in dan 1 check-out per penempatan
+  @@index([status])
+}
+
+// ───────────────────────── SISTEM ─────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorId    String?  @db.Uuid
+  actor      User?    @relation(fields: [actorId], references: [id])
+  action     String   // mis. "VIEW_KTP", "VIEW_VIDEO", "APPROVE_VERIFICATION", "EDIT_ATTENDANCE"
+  targetType String
+  targetId   String
+  meta       Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+}
+
+// Pengaturan yang bisa diubah admin tanpa deploy ulang.
+// Contoh: faceMatchThreshold (default 90), maxReuploadPerDay (default 3), defaultGeofenceRadius (default 100)
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
