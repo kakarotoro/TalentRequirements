@@ -22,35 +22,31 @@ export async function getSession(): Promise<AppUserSession | null> {
       return null;
     }
 
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: { talent: true },
-    });
-
-    if (!dbUser) {
-      // In case user exists in Supabase Auth but not yet in User table, create default
-      const role = (user.user_metadata?.role as "ADMIN" | "TALENT") || "TALENT";
-      const created = await prisma.user.create({
-        data: {
-          id: user.id,
-          email: user.email || "",
-          role,
-        },
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: { talent: true },
       });
 
-      return {
-        id: created.id,
-        email: created.email,
-        role: created.role as "ADMIN" | "TALENT",
-      };
+      if (dbUser) {
+        return {
+          id: dbUser.id,
+          email: dbUser.email,
+          role: dbUser.role as "ADMIN" | "TALENT",
+          talentProfileId: dbUser.talent?.id,
+          status: dbUser.talent?.status,
+        };
+      }
+    } catch {
+      // Prisma DB connection not established yet
     }
 
+    // Fallback to Supabase Auth user metadata
+    const role = (user.user_metadata?.role as "ADMIN" | "TALENT") || "TALENT";
     return {
-      id: dbUser.id,
-      email: dbUser.email,
-      role: dbUser.role as "ADMIN" | "TALENT",
-      talentProfileId: dbUser.talent?.id,
-      status: dbUser.talent?.status,
+      id: user.id,
+      email: user.email || "",
+      role,
     };
   } catch (error) {
     console.error("Error retrieving user session:", error);

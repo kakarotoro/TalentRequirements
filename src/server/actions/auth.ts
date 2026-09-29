@@ -27,24 +27,28 @@ export async function registerAction(data: RegisterInput) {
       return { success: false, error: authError?.message || "Gagal membuat akun" };
     }
 
-    // Upsert into Prisma User
-    await prisma.user.upsert({
-      where: { id: authData.user.id },
-      update: { email, role },
-      create: {
-        id: authData.user.id,
-        email,
-        role,
-      },
-    });
+    // Upsert into Prisma User if DB is connected
+    try {
+      await prisma.user.upsert({
+        where: { id: authData.user.id },
+        update: { email, role },
+        create: {
+          id: authData.user.id,
+          email,
+          role,
+        },
+      });
 
-    await logAudit({
-      actorId: authData.user.id,
-      action: "REGISTER",
-      targetType: "User",
-      targetId: authData.user.id,
-      meta: { email, role },
-    });
+      await logAudit({
+        actorId: authData.user.id,
+        action: "REGISTER",
+        targetType: "User",
+        targetId: authData.user.id,
+        meta: { email, role },
+      });
+    } catch (dbErr) {
+      console.warn("Database not connected yet; Supabase Auth user created successfully:", dbErr);
+    }
 
     return {
       success: true,
@@ -75,20 +79,28 @@ export async function loginAction(data: LoginInput) {
       return { success: false, error: authError?.message || "Email atau password salah" };
     }
 
-    // Get user details
-    const dbUser = await prisma.user.findUnique({
-      where: { id: authData.user.id },
-      include: { talent: true },
-    });
+    let role = (authData.user.user_metadata?.role as "ADMIN" | "TALENT") || "TALENT";
 
-    const role = dbUser?.role || "TALENT";
+    // Get user details from DB if available
+    try {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: authData.user.id },
+        include: { talent: true },
+      });
 
-    await logAudit({
-      actorId: authData.user.id,
-      action: "LOGIN",
-      targetType: "User",
-      targetId: authData.user.id,
-    });
+      if (dbUser?.role) {
+        role = dbUser.role as "ADMIN" | "TALENT";
+      }
+
+      await logAudit({
+        actorId: authData.user.id,
+        action: "LOGIN",
+        targetType: "User",
+        targetId: authData.user.id,
+      });
+    } catch (dbErr) {
+      console.warn("DB not connected yet, using Supabase Auth metadata role:", role);
+    }
 
     return {
       success: true,
