@@ -33,7 +33,8 @@ export default function RegisterPage() {
       setError(res.error || "Gagal membuat akun");
       setLoading(false);
     } else {
-      router.push("/login?registered=true");
+      router.push(res.redirectUrl || "/dashboard");
+      router.refresh();
     }
   };
 

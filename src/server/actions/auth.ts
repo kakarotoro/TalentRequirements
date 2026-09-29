@@ -27,7 +27,18 @@ export async function registerAction(data: RegisterInput) {
       return { success: false, error: authError?.message || "Gagal membuat akun" };
     }
 
-    // Upsert into Prisma User if DB is connected
+    // Auto-confirm email directly in database (offline / development mode: no email verification required)
+    try {
+      await prisma.$executeRaw`
+        UPDATE auth.users 
+        SET email_confirmed_at = NOW() 
+        WHERE id = ${authData.user.id}::uuid
+      `;
+    } catch (confirmErr) {
+      console.warn("Auto-confirm error:", confirmErr);
+    }
+
+    // Upsert into Prisma User
     try {
       await prisma.user.upsert({
         where: { id: authData.user.id },
@@ -47,12 +58,23 @@ export async function registerAction(data: RegisterInput) {
         meta: { email, role },
       });
     } catch (dbErr) {
-      console.warn("Database not connected yet; Supabase Auth user created successfully:", dbErr);
+      console.warn("Database upsert error during registration:", dbErr);
+    }
+
+    // Automatically sign in the user immediately so no login or email verification is needed
+    try {
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+    } catch (loginErr) {
+      console.warn("Auto-login error after registration:", loginErr);
     }
 
     return {
       success: true,
       user: { id: authData.user.id, email, role },
+      redirectUrl: role === "ADMIN" ? "/admin" : "/dashboard",
     };
   } catch (error: any) {
     console.error("Register action error:", error);
@@ -70,10 +92,33 @@ export async function loginAction(data: LoginInput) {
 
   try {
     const supabase = await createClient();
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+    let { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    // If Supabase reports email is not confirmed, auto-confirm directly in database and retry immediately
+    if (
+      authError &&
+      (authError.message?.toLowerCase().includes("not confirmed") ||
+        authError.message?.toLowerCase().includes("email_not_confirmed") ||
+        authError.status === 400)
+    ) {
+      try {
+        await prisma.$executeRaw`
+          UPDATE auth.users 
+          SET email_confirmed_at = NOW() 
+          WHERE email = ${email}
+        `;
+        const retry = await supabase.auth.signInWithPassword({ email, password });
+        if (!retry.error && retry.data.user) {
+          authData = retry.data;
+          authError = null;
+        }
+      } catch (retryErr) {
+        console.warn("Retry auto-confirm error:", retryErr);
+      }
+    }
 
     if (authError || !authData.user) {
       return { success: false, error: authError?.message || "Email atau password salah" };
