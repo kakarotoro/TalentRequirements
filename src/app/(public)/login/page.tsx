@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { loginAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,16 +36,21 @@ export default function LoginPage() {
     <div className="max-w-md mx-auto py-12 animate-fade-in">
       <Card className="border-slate-200/90 shadow-sm">
         <CardHeader className="text-center pb-2">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center mx-auto mb-3 border border-blue-100 shadow-2xs">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
+          <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-3 border border-slate-100 bg-white shadow-2xs p-1 flex items-center justify-center">
+            <Image
+              src="/logo.webp"
+              alt="SHP Entertainment Logo"
+              width={64}
+              height={64}
+              className="object-contain w-full h-full"
+              priority
+            />
           </div>
           <CardTitle className="text-xl font-bold text-slate-900">
-            Masuk ke Akun Portal
+            Masuk ke Portal Talent
           </CardTitle>
           <p className="text-xs text-slate-500 mt-1">
-            Gunakan email dan password terdaftar Anda
+            Gunakan email dan kata sandi akun Anda
           </p>
         </CardHeader>
 
@@ -61,7 +67,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="nama@perusahaan.com atau talent@email.com"
+              placeholder="talent@email.com"
               required
             />
 
@@ -80,11 +86,17 @@ export default function LoginPage() {
               Masuk Sekarang
             </Button>
 
-            <div className="pt-2 text-center border-t border-slate-100 w-full">
+            <div className="pt-2 text-center border-t border-slate-100 w-full space-y-1.5">
               <p className="text-xs text-slate-500">
                 Belum terdaftar sebagai talent?{" "}
                 <Link href="/register" className="text-blue-700 hover:text-blue-800 font-semibold underline underline-offset-2">
                   Daftar di sini
+                </Link>
+              </p>
+              <p className="text-xs text-slate-400">
+                Staf / Administrator?{" "}
+                <Link href="/admin/login" className="text-slate-600 hover:text-blue-700 font-medium underline underline-offset-2">
+                  Masuk ke Portal Admin
                 </Link>
               </p>
             </div>

@@ -43,7 +43,7 @@ export default async function AdminDashboardPage() {
         <div className="flex items-center gap-2.5">
           <Link href="/admin/events/new">
             <Button size="sm" className="font-bold shadow-xs">
-              ＋ Buat Lowongan Event
+              ＋ Buat Penugasan Event
             </Button>
           </Link>
           <Link href="/admin/reports">

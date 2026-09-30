@@ -28,7 +28,7 @@ export async function sendVerificationResultEmail(params: {
       <p>
         ${
           isApproved
-            ? "Selamat! Profil Anda telah berhasil diverifikasi oleh tim kurasi kami. Anda sekarang dapat melihat dan melamar lowongan event SPG & Usher yang tersedia."
+            ? "Selamat! Profil Anda telah berhasil diverifikasi oleh tim kurasi kami. Profil Anda kini aktif dalam database talent kami, dan tim Admin akan langsung menghubungi Anda secara pribadi (japri via WhatsApp/Telepon) saat ada event yang cocok dengan kriteria Anda."
             : "Mohon maaf, pengajuan verifikasi profil Anda belum dapat kami setujui saat ini."
         }
       </p>

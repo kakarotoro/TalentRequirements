@@ -45,11 +45,22 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
+  // Allow unauthenticated access to /admin/login
+  if (path === "/admin/login") {
+    if (user) {
+      const role = user.user_metadata?.role;
+      const url = request.nextUrl.clone();
+      url.pathname = role === "ADMIN" ? "/admin" : "/dashboard";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
   // Protect Admin routes
   if (path.startsWith("/admin")) {
     if (!user) {
       const url = request.nextUrl.clone();
-      url.pathname = "/login";
+      url.pathname = "/admin/login";
       url.searchParams.set("redirect", path);
       return NextResponse.redirect(url);
     }
@@ -78,8 +89,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Redirect authenticated user away from public login/register
-  if (user && (path === "/login" || path === "/register")) {
+  // Redirect authenticated user away from public login/register/admin/login
+  if (user && (path === "/login" || path === "/register" || path === "/admin/login")) {
     const role = user.user_metadata?.role;
     const url = request.nextUrl.clone();
     url.pathname = role === "ADMIN" ? "/admin" : "/dashboard";

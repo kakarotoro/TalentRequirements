@@ -93,11 +93,8 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         <CardHeader className="bg-slate-50/50">
           <div className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-full bg-blue-700 text-white flex items-center justify-center text-[10px] font-bold">1</span>
-            <CardTitle>Identitas Pribadi Resmi (Standar UU PDP)</CardTitle>
+            <CardTitle>Identitas Pribadi Resmi</CardTitle>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            NIK disimpan terenkripsi dengan standar militer AES-256-GCM dan tidak dapat diakses publik.
-          </p>
         </CardHeader>
         <CardContent className="space-y-4 pt-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

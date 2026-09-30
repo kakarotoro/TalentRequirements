@@ -1,8 +1,7 @@
 import { getEventDetailAction } from "@/server/actions/events";
-import { applyEventAction } from "@/server/actions/applications";
 import { requireRole } from "@/lib/auth";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ export default async function EventDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const user = await requireRole(["TALENT", "ADMIN"]);
+  await requireRole(["TALENT", "ADMIN"]);
   const res = await getEventDetailAction(id);
 
   if (!res.success || !res.event) {
@@ -22,23 +21,17 @@ export default async function EventDetailPage({
 
   const { event, userApplication } = res;
 
-  const handleApply = async () => {
-    "use server";
-    await applyEventAction(id);
-    redirect(`/events/${id}`);
-  };
-
   return (
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
         <Link
-          href="/events"
+          href="/dashboard"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Kembali ke Daftar Lowongan
+          Kembali ke Dashboard
         </Link>
       </div>
 
@@ -142,20 +135,11 @@ export default async function EventDetailPage({
           </div>
         </div>
 
-        {/* Apply Action */}
+        {/* Assignment Notice */}
         {!userApplication && (
-          <form action={handleApply} className="pt-5 border-t border-slate-200 flex justify-end">
-            <Button
-              type="submit"
-              size="lg"
-              disabled={user.status !== "VERIFIED" || event.status !== "OPEN"}
-              className="w-full sm:w-auto font-bold shadow-xs"
-            >
-              {user.status !== "VERIFIED"
-                ? "Selesaikan Verifikasi Berkas untuk Melamar"
-                : "Ajukan Lamaran Penugasan"}
-            </Button>
-          </form>
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 text-center leading-relaxed">
+            Penugasan untuk event ini dikelola langsung oleh tim internal. Tim Admin akan menghubungi Anda secara langsung (japri via WhatsApp) bila profil Anda terpilih.
+          </div>
         )}
       </div>
     </div>

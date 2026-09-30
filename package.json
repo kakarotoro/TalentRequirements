@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
-    "prisma:seed": "node --loader ts-node/esm prisma/seed.ts"
+    "prisma:seed": "node --loader ts-node/esm prisma/seed.ts",
+    "create:admin": "npx tsx scripts/create-admin.ts"
   },
   "dependencies": {
     "@aws-sdk/client-rekognition": "^3.758.0",
@@ -47,6 +48,9 @@
       "@prisma/engines",
       "prisma",
       "unrs-resolver"
+    ],
+    "ignoredBuiltDependencies": [
+      "tesseract.js"
     ]
   }
 }

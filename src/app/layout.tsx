@@ -4,8 +4,11 @@ import { Navbar } from "@/components/Navbar";
 import { getSession } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Platform Rekrutmen & Absensi SPG / Usher",
+  title: "SHP Entertainment - Platform Rekrutmen & Penugasan SPG / Usher",
   description: "Platform digital rekrutmen dan absensi berbasis GPS & AI Face Verification untuk SPG dan Usher",
+  icons: {
+    icon: "/logo.webp",
+  },
 };
 
 export default async function RootLayout({
@@ -25,7 +28,7 @@ export default async function RootLayout({
         <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500 shadow-2xs">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="font-semibold text-slate-600">
-              © 2026 SPG & Usher Recruitment Portal. All rights reserved.
+              © 2026 SHP Entertainment. All rights reserved.
             </p>
             <div className="flex items-center gap-3 text-[11px]">
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">

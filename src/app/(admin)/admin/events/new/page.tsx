@@ -65,11 +65,11 @@ export default function NewEventPage() {
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
-            Buat Lowongan Penugasan Baru
+            Buat Penugasan Event Baru
           </h1>
         </div>
         <p className="text-xs text-slate-500 mt-1">
-          Tentukan parameter lowongan, honor, jadwal, dan batas radius geofence absensi di lokasi penugasan.
+          Tentukan parameter penugasan, honor, jadwal, dan batas radius geofence absensi di lokasi penugasan.
         </p>
       </div>
 

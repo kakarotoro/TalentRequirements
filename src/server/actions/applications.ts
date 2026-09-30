@@ -129,3 +129,66 @@ export async function getMyApplicationsAction() {
 
   return { success: true, applications };
 }
+
+export async function adminAssignTalentAction(params: {
+  eventId: string;
+  talentId: string;
+}) {
+  const admin = await requireRole(["ADMIN"]);
+
+  try {
+    const existing = await prisma.application.findUnique({
+      where: {
+        eventId_talentId: {
+          eventId: params.eventId,
+          talentId: params.talentId,
+        },
+      },
+    });
+
+    if (existing) {
+      if (existing.status !== "CONFIRMED") {
+        await prisma.application.update({
+          where: { id: existing.id },
+          data: {
+            status: "CONFIRMED",
+            decidedAt: new Date(),
+            decidedById: admin.id,
+          },
+        });
+      }
+      revalidatePath(`/admin/events/${params.eventId}`);
+      return { success: true, application: existing };
+    }
+
+    const application = await prisma.application.create({
+      data: {
+        eventId: params.eventId,
+        talentId: params.talentId,
+        status: "CONFIRMED",
+        decidedAt: new Date(),
+        decidedById: admin.id,
+      },
+      include: {
+        event: true,
+        talent: {
+          include: { user: true },
+        },
+      },
+    });
+
+    await logAudit({
+      actorId: admin.id,
+      action: "ADMIN_ASSIGN_TALENT",
+      targetType: "Application",
+      targetId: application.id,
+      meta: { eventId: params.eventId, talentId: params.talentId },
+    });
+
+    revalidatePath(`/admin/events/${params.eventId}`);
+    return { success: true, application };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Gagal menugaskan talent ke event" };
+  }
+}
+

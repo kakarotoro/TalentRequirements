@@ -4,16 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { registerAction } from "@/server/actions/auth";
+import { loginAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 
-export default function RegisterPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,25 +21,24 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    const res = await registerAction({
+    const res = await loginAction({
       email,
       password,
-      confirmPassword,
-      role: "TALENT",
+      portal: "ADMIN",
     });
 
     if (!res.success) {
-      setError(res.error || "Gagal membuat akun");
+      setError(res.error || "Gagal masuk ke portal admin");
       setLoading(false);
     } else {
-      router.push(res.redirectUrl || "/dashboard");
+      router.push(res.redirectUrl || "/admin");
       router.refresh();
     }
   };
 
   return (
-    <div className="max-w-md mx-auto py-10 animate-fade-in">
-      <Card className="border-slate-200/90 shadow-sm">
+    <div className="max-w-md mx-auto py-12 animate-fade-in">
+      <Card className="border-slate-200/90 shadow-md">
         <CardHeader className="text-center pb-2">
           <div className="w-16 h-16 rounded-2xl overflow-hidden mx-auto mb-3 border border-slate-100 bg-white shadow-2xs p-1 flex items-center justify-center">
             <Image
@@ -52,11 +50,11 @@ export default function RegisterPage() {
               priority
             />
           </div>
-          <CardTitle className="text-xl font-bold text-slate-900">
-            Daftar Sebagai Talent
+          <CardTitle className="text-xl font-extrabold text-slate-900">
+            Portal Masuk Administrator
           </CardTitle>
           <p className="text-xs text-slate-500 mt-1">
-            Portal pendaftaran resmi talent SPG & Usher
+            Panel Kurasi, Review Verifikasi & Manajemen Penugasan
           </p>
         </CardHeader>
 
@@ -68,50 +66,45 @@ export default function RegisterPage() {
               </div>
             )}
 
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed">
+              <span className="font-bold text-slate-800 block mb-0.5">🔒 Akses Terbatas Internal</span>
+              Halaman ini dikhususkan bagi staf administrator. Pendaftaran akun admin baru dilakukan melalui otorisasi internal.
+            </div>
+
             <Input
-              label="Alamat Email Pribadi"
+              label="Alamat Email Administrator"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="nama@email.com"
+              placeholder="admin@perusahaan.com"
               required
             />
 
             <Input
-              label="Kata Sandi (Min. 8 Karakter)"
+              label="Kata Sandi Administrator"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
             />
-
-            <Input
-              label="Konfirmasi Kata Sandi"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
           </CardContent>
 
           <CardFooter className="flex flex-col gap-3 pt-2">
-            <Button type="submit" className="w-full" size="md" isLoading={loading}>
-              Daftar Sebagai Talent
+            <Button
+              type="submit"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold"
+              size="md"
+              isLoading={loading}
+            >
+              Masuk Sebagai Admin
             </Button>
 
-            <div className="pt-2 text-center border-t border-slate-100 w-full space-y-1.5">
+            <div className="pt-2 text-center border-t border-slate-100 w-full">
               <p className="text-xs text-slate-500">
-                Sudah memiliki akun talent?{" "}
+                Bukan administrator?{" "}
                 <Link href="/login" className="text-blue-700 hover:text-blue-800 font-semibold underline underline-offset-2">
-                  Masuk di sini
-                </Link>
-              </p>
-              <p className="text-xs text-slate-400">
-                Staf / Administrator?{" "}
-                <Link href="/admin/login" className="text-slate-600 hover:text-blue-700 font-medium underline underline-offset-2">
-                  Masuk ke Portal Admin
+                  Masuk sebagai Talent
                 </Link>
               </p>
             </div>

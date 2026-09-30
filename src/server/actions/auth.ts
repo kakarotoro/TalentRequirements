@@ -6,6 +6,13 @@ import { loginSchema, registerSchema, LoginInput, RegisterInput } from "@/valida
 import { logAudit } from "@/lib/audit";
 
 export async function registerAction(data: RegisterInput) {
+  if ((data as any)?.role === "ADMIN") {
+    return {
+      success: false,
+      error: "Pendaftaran akun admin baru dinonaktifkan. Akun admin hanya dapat dibuat melalui otorisasi internal.",
+    };
+  }
+
   const parsed = registerSchema.safeParse(data);
   if (!parsed.success) {
     return { success: false, error: parsed.error.errors[0]?.message };
@@ -74,7 +81,7 @@ export async function registerAction(data: RegisterInput) {
     return {
       success: true,
       user: { id: authData.user.id, email, role },
-      redirectUrl: role === "ADMIN" ? "/admin" : "/dashboard",
+      redirectUrl: "/dashboard",
     };
   } catch (error: any) {
     console.error("Register action error:", error);
@@ -88,7 +95,7 @@ export async function loginAction(data: LoginInput) {
     return { success: false, error: parsed.error.errors[0]?.message };
   }
 
-  const { email, password } = parsed.data;
+  const { email, password, portal } = parsed.data;
 
   try {
     const supabase = await createClient();
@@ -145,6 +152,13 @@ export async function loginAction(data: LoginInput) {
       });
     } catch (dbErr) {
       console.warn("DB not connected yet, using Supabase Auth metadata role:", role);
+    }
+
+    if (portal === "ADMIN" && role !== "ADMIN") {
+      return {
+        success: false,
+        error: "Akses ditolak: Akun ini terdaftar sebagai Talent. Silakan gunakan portal login Talent.",
+      };
     }
 
     return {

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutAction } from "@/server/actions/auth";
 
@@ -31,17 +32,22 @@ export function Navbar({ user }: NavbarProps) {
             href={isAdmin ? "/admin" : user ? "/dashboard" : "/"}
             className="flex items-center gap-2.5 group"
           >
-            <div className="w-9 h-9 rounded-lg bg-blue-700 flex items-center justify-center text-white shadow-xs group-hover:bg-blue-800 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+            <div className="relative w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shrink-0 border border-slate-100 bg-white shadow-2xs">
+              <Image
+                src="/logo.webp"
+                alt="SHP Entertainment Logo"
+                width={40}
+                height={40}
+                className="object-contain w-full h-full group-hover:scale-105 transition-transform"
+                priority
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-extrabold text-base tracking-tight text-slate-900 leading-tight">
-                SPG & Usher <span className="text-blue-700">Portal</span>
+                SHP <span className="text-blue-700">Entertainment</span>
               </span>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest leading-none mt-0.5">
-                Enterprise Recruitment
+              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest leading-none mt-0.5">
+                SPG & USHER Recruitment
               </span>
             </div>
           </Link>
@@ -83,7 +89,6 @@ export function Navbar({ user }: NavbarProps) {
                     { href: "/dashboard", label: "Dashboard" },
                     { href: "/profile", label: "Data Diri" },
                     { href: "/verification", label: "Verifikasi Berkas" },
-                    { href: "/events", label: "Cari Lowongan" },
                   ].map((item) => {
                     const isActive =
                       item.href === "/dashboard"
@@ -128,18 +133,29 @@ export function Navbar({ user }: NavbarProps) {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 sm:gap-2.5">
               <Link
                 href="/login"
-                className="text-xs font-bold text-slate-700 hover:text-blue-700 px-3.5 py-2 rounded-lg hover:bg-slate-50 transition-colors"
+                className="text-xs font-bold text-slate-700 hover:text-blue-700 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors"
               >
                 Masuk
               </Link>
               <Link
                 href="/register"
-                className="text-xs font-bold px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white shadow-xs transition-all duration-150 active:scale-95"
+                className="text-xs font-bold px-3.5 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white shadow-xs transition-all duration-150 active:scale-95"
               >
                 Daftar Talent
+              </Link>
+              <div className="h-4 w-px bg-slate-200 mx-0.5 hidden sm:block"></div>
+              <Link
+                href="/admin/login"
+                className="text-xs font-bold text-slate-700 hover:text-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center gap-1.5 shadow-2xs"
+                title="Portal Masuk Administrator"
+              >
+                <svg className="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span>Portal Admin</span>
               </Link>
             </div>
           )}

@@ -68,9 +68,10 @@ export default async function TalentDashboardPage() {
             </Button>
           </Link>
           {status === "VERIFIED" ? (
-            <Link href="/events">
-              <Button size="sm">Cari Lowongan Event</Button>
-            </Link>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+              Siap Menerima Tugas
+            </div>
           ) : (
             <Link href="/verification">
               <Button size="sm">Verifikasi Dokumen</Button>
@@ -78,6 +79,27 @@ export default async function TalentDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Verified Status Information Banner */}
+      {status === "VERIFIED" && (
+        <div className="p-6 rounded-2xl bg-emerald-50/70 border border-emerald-200 shadow-2xs">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <h4 className="font-bold text-sm text-emerald-900">
+                Profil Anda Telah Terverifikasi & Aktif
+              </h4>
+              <p className="text-xs text-emerald-800 mt-1 leading-relaxed">
+                Data profil Anda telah masuk ke database kurasi talent. Tim Admin akan langsung menghubungi Anda secara pribadi (japri lewat WhatsApp/Telepon) saat ada event yang sesuai dengan profil Anda. Pastikan nomor kontak Anda selalu aktif.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Verification Status Warning / Action Banner */}
       {status === "DRAFT" && (
@@ -193,22 +215,15 @@ export default async function TalentDashboardPage() {
         </div>
       )}
 
-      {/* Recent Applications List */}
+      {/* Event History List */}
       <div className="space-y-4">
         <h3 className="text-base font-bold text-slate-900 tracking-tight">
-          Riwayat Lamaran Event Anda
+          Riwayat Event
         </h3>
 
         {!profile?.applications || profile.applications.length === 0 ? (
           <div className="p-8 text-center bg-white border border-slate-200/90 rounded-2xl text-xs text-slate-500 shadow-2xs">
-            Anda belum melamar event apapun.{" "}
-            {status === "VERIFIED" ? (
-              <Link href="/events" className="text-blue-700 font-bold underline ml-1">
-                Jelajahi lowongan event aktif
-              </Link>
-            ) : (
-              "Selesaikan verifikasi berkas terlebih dahulu untuk mulai melamar."
-            )}
+            Belum ada event
           </div>
         ) : (
           <div className="overflow-x-auto border border-slate-200/90 rounded-xl bg-white shadow-2xs">
@@ -218,7 +233,7 @@ export default async function TalentDashboardPage() {
                   <th className="px-4 py-3">Nama Event</th>
                   <th className="px-4 py-3">Klien</th>
                   <th className="px-4 py-3">Tanggal Penugasan</th>
-                  <th className="px-4 py-3">Status Lamaran</th>
+                  <th className="px-4 py-3">Status Penugasan</th>
                   <th className="px-4 py-3 text-right">Aksi</th>
                 </tr>
               </thead>
