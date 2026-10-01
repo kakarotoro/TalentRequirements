@@ -30,13 +30,30 @@ export async function reviewVerificationAction(params: {
   const isApproved = params.decision === "APPROVED";
 
   try {
+    // Ensure admin user exists in DB to prevent foreign key errors
+    let reviewerId = admin.id;
+    const adminUser = await prisma.user.findUnique({ where: { id: admin.id } });
+    if (!adminUser) {
+      if (admin.email) {
+        const userByEmail = await prisma.user.findUnique({ where: { email: admin.email } });
+        if (userByEmail) {
+          reviewerId = userByEmail.id;
+        } else {
+          const createdAdmin = await prisma.user.create({
+            data: { id: admin.id, email: admin.email, role: "ADMIN" },
+          });
+          reviewerId = createdAdmin.id;
+        }
+      }
+    }
+
     // 1. Update Verification status
     const updatedVerification = await prisma.verification.update({
       where: { id: params.verificationId },
       data: {
         decision: params.decision,
         reviewNote: params.reviewNote || null,
-        reviewedById: admin.id,
+        reviewedById: reviewerId,
         reviewedAt: new Date(),
       },
     });

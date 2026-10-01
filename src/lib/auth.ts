@@ -23,10 +23,30 @@ export async function getSession(): Promise<AppUserSession | null> {
     }
 
     try {
-      const dbUser = await prisma.user.findUnique({
+      let dbUser = await prisma.user.findUnique({
         where: { id: user.id },
         include: { talent: true },
       });
+
+      if (!dbUser && user.email) {
+        dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          include: { talent: true },
+        });
+
+        if (dbUser && dbUser.id !== user.id) {
+          try {
+            await prisma.$executeRawUnsafe(
+              'UPDATE "User" SET id = $1::uuid WHERE id = $2::uuid',
+              user.id,
+              dbUser.id
+            );
+            dbUser.id = user.id;
+          } catch (e) {
+            console.error("Failed to sync user id:", e);
+          }
+        }
+      }
 
       if (dbUser) {
         return {
