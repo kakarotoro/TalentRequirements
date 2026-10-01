@@ -9,6 +9,7 @@ interface NavbarProps {
   user?: {
     email: string;
     role: "TALENT" | "ADMIN";
+    status?: string;
   } | null;
 }
 
@@ -88,7 +89,10 @@ export function Navbar({ user }: NavbarProps) {
                   {[
                     { href: "/dashboard", label: "Dashboard" },
                     { href: "/profile", label: "Data Diri" },
-                    { href: "/verification", label: "Verifikasi Berkas" },
+                    {
+                      href: "/verification",
+                      label: user?.status === "VERIFIED" ? "Status Verifikasi ✓" : "Verifikasi Berkas",
+                    },
                   ].map((item) => {
                     const isActive =
                       item.href === "/dashboard"

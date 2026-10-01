@@ -1,252 +1,245 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ImageUploader } from "@/components/upload/ImageUploader";
-import { VideoCastingUploader, VideoCastingData } from "@/components/upload/VideoCastingUploader";
-import { submitVerificationAction } from "@/server/actions/verification";
-import { STORAGE_BUCKETS } from "@/lib/storage";
-import { Button } from "@/components/ui/button";
+import { requireRole } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { VerificationForm } from "./VerificationForm";
 
-export default function VerificationPage() {
-  const router = useRouter();
-  const [step, setStep] = useState<number>(1);
-  const [ktpPath, setKtpPath] = useState<string | null>(null);
-  const [selfiePath, setSelfiePath] = useState<string | null>(null);
-  const [videoData, setVideoData] = useState<VideoCastingData | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+export default async function VerificationPage() {
+  const session = await requireRole(["TALENT"]);
 
-  const handleSubmit = async () => {
-    if (!ktpPath || !selfiePath || !videoData) {
-      setError("Semua berkas (KTP, Selfie, dan Video Casting) wajib diunggah.");
-      return;
-    }
+  const profile = await prisma.talentProfile.findUnique({
+    where: { userId: session.id },
+    include: {
+      verifications: {
+        orderBy: { attemptNo: "desc" },
+        take: 1,
+        include: { video: true },
+      },
+    },
+  });
 
-    setSubmitting(true);
-    setError(null);
+  if (!profile) {
+    redirect("/profile");
+  }
 
-    const res = await submitVerificationAction({
-      ktpPath,
-      selfiePath,
-      video: videoData,
-    });
+  const latestVerif = profile.verifications[0];
+  const status = profile.status;
 
-    if (!res.success) {
-      setError(res.error || "Gagal mengirim berkas verifikasi");
-      setSubmitting(false);
-    } else {
-      setDone(true);
-      router.push("/dashboard");
-    }
-  };
+  // 1. If status is already VERIFIED
+  if (status === "VERIFIED") {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            Status Verifikasi Identitas
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Status kepatuhan identitas resmi dan aktivasi akun talent Anda.
+          </p>
+        </div>
 
+        <Card className="border-emerald-200/90 bg-white shadow-2xs overflow-hidden">
+          <div className="bg-emerald-600 px-6 py-8 text-white text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-xs">
+              <svg className="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+              Akun Anda Telah Terverifikasi!
+            </h2>
+            <p className="text-emerald-100 text-xs sm:text-sm mt-1 max-w-lg mx-auto">
+              Seluruh berkas identitas Anda (KTP, Selfie, dan Video Casting) telah disetujui oleh tim kurasi SHP Entertainment.
+            </p>
+            <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-emerald-800 text-xs font-bold shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+              STATUS: TERVERIFIKASI &amp; AKTIF
+            </div>
+          </div>
+
+          <CardContent className="p-6 space-y-6">
+            <div className="border border-slate-100 rounded-xl overflow-hidden divide-y divide-slate-100 bg-slate-50/50">
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Dokumen KTP Fisik</h4>
+                    <p className="text-[11px] text-slate-500">NIK terdaftar dan tervalidasi</p>
+                  </div>
+                </div>
+                <Badge variant="success">✓ Terverifikasi</Badge>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Foto Selfie Wajah</h4>
+                    <p className="text-[11px] text-slate-500">Kesesuaian wajah dengan KTP terverifikasi</p>
+                  </div>
+                </div>
+                <Badge variant="success">✓ Terverifikasi</Badge>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Video Casting Perkenalan</h4>
+                    <p className="text-[11px] text-slate-500">Kesesuaian gestur dan audio perkenalan</p>
+                  </div>
+                </div>
+                <Badge variant="success">✓ Terverifikasi</Badge>
+              </div>
+            </div>
+
+            {latestVerif?.reviewNote && (
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                  Catatan Reviewer:
+                </span>
+                <p className="text-xs text-slate-700 leading-relaxed italic">
+                  &ldquo;{latestVerif.reviewNote}&rdquo;
+                </p>
+                {latestVerif.reviewedAt && (
+                  <span className="text-[10px] text-slate-400 block mt-1.5">
+                    Disetujui pada: {new Date(latestVerif.reviewedAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })} WIB
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <Link href="/dashboard">
+                <Button size="md" className="font-bold shadow-xs">
+                  ← Ke Dashboard Utama
+                </Button>
+              </Link>
+              <Link href="/profile">
+                <Button variant="outline" size="md">
+                  Lihat Data Diri
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 2. If status is PENDING_REVIEW
+  if (status === "PENDING_REVIEW") {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            Status Verifikasi Identitas
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Status kepatuhan identitas resmi dan antrean kurasi akun talent Anda.
+          </p>
+        </div>
+
+        <Card className="border-blue-200/90 bg-white shadow-2xs overflow-hidden">
+          <div className="bg-blue-600 px-6 py-8 text-white text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-xs">
+              <svg className="w-9 h-9 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+              Berkas Anda Sedang Ditinjau Tim Kurasi
+            </h2>
+            <p className="text-blue-100 text-xs sm:text-sm mt-1 max-w-lg mx-auto">
+              Dokumen verifikasi (KTP, Selfie, dan Video Casting) telah berhasil kami terima dan sedang dalam antrean pemeriksaan oleh admin reviewer SHP Entertainment.
+            </p>
+            <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-blue-800 text-xs font-bold shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
+              STATUS: DALAM PROSES KURASI
+            </div>
+          </div>
+
+          <CardContent className="p-6 space-y-6">
+            <div className="border border-slate-100 rounded-xl overflow-hidden divide-y divide-slate-100 bg-slate-50/50">
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Dokumen KTP Fisik</h4>
+                    <p className="text-[11px] text-slate-500">Berkas berhasil diunggah dan disimpan</p>
+                  </div>
+                </div>
+                <Badge variant="warning">Sedang Ditinjau</Badge>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Foto Selfie Wajah</h4>
+                    <p className="text-[11px] text-slate-500">Berkas berhasil diunggah</p>
+                  </div>
+                </div>
+                <Badge variant="warning">Sedang Ditinjau</Badge>
+              </div>
+
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Video Casting Perkenalan</h4>
+                    <p className="text-[11px] text-slate-500">Berkas berhasil diunggah</p>
+                  </div>
+                </div>
+                <Badge variant="warning">Sedang Ditinjau</Badge>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 text-xs text-blue-900">
+              <p className="leading-relaxed">
+                ℹ️ Anda <b>tidak perlu mengunggah ulang berkas</b>. Begitu admin selesai melakukan review, notifikasi dan status akun Anda akan langsung berubah secara otomatis.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <Link href="/dashboard">
+                <Button size="md" className="font-bold shadow-xs">
+                  ← Kembali ke Dashboard
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // 3. If status is DRAFT or REJECTED
   return (
-    <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-          Verifikasi Identitas & Video Casting
-        </h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Tahapan verifikasi kepatuhan identitas resmi dan kecocokan wajah berbasis AI Rekognition.
-        </p>
-      </div>
-
-      {/* Stepper Progress Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-2xs">
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { num: 1, label: "Foto KTP" },
-            { num: 2, label: "Foto Selfie" },
-            { num: 3, label: "Video Casting" },
-            { num: 4, label: "Kirim Verifikasi" },
-          ].map((s) => (
-            <div
-              key={s.num}
-              onClick={() => setStep(s.num)}
-              className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all duration-150 ${
-                step === s.num
-                  ? "bg-blue-50 text-blue-800 font-bold border border-blue-200/80"
-                  : step > s.num
-                  ? "text-emerald-700 font-medium"
-                  : "text-slate-400 hover:text-slate-600"
-              }`}
-            >
-              <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  step === s.num
-                    ? "bg-blue-700 text-white"
-                    : step > s.num
-                    ? "bg-emerald-100 text-emerald-800"
-                    : "bg-slate-200 text-slate-600"
-                }`}
-              >
-                {step > s.num ? "✓" : s.num}
-              </div>
-              <span className="hidden sm:inline text-xs">{s.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
-          {error}
-        </div>
-      )}
-
-      {/* Step 1: KTP */}
-      {step === 1 && (
-        <Card className="border-slate-200/90 shadow-2xs">
-          <CardHeader className="bg-slate-50/50">
-            <CardTitle>Langkah 1: Unggah Foto KTP Asli</CardTitle>
-            <p className="text-xs text-slate-500 mt-1">
-              Foto KTP disimpan dalam bucket privat terenkripsi dan hanya dapat diakses oleh admin reviewer resmi.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-5">
-            <ImageUploader
-              label="Foto KTP Fisik"
-              bucket={STORAGE_BUCKETS.KTP}
-              onUploaded={(path) => setKtpPath(path)}
-              helper="Pastikan seluruh sudut KTP dan teks nama/NIK dapat terbaca jelas."
-            />
-            <div className="flex justify-end pt-2">
-              <Button
-                type="button"
-                disabled={!ktpPath}
-                onClick={() => setStep(2)}
-              >
-                Lanjut ke Foto Selfie →
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Step 2: Selfie */}
-      {step === 2 && (
-        <Card className="border-slate-200/90 shadow-2xs">
-          <CardHeader className="bg-slate-50/50">
-            <CardTitle>Langkah 2: Foto Selfie Wajah (Close-Up)</CardTitle>
-            <p className="text-xs text-slate-500 mt-1">
-              Ambil selfie tegak lurus dengan pencahayaan terang untuk dicocokkan otomatis oleh AI dengan KTP.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-5">
-            <ImageUploader
-              label="Foto Selfie Pendaftar"
-              bucket={STORAGE_BUCKETS.SELFIES}
-              onUploaded={(path) => setSelfiePath(path)}
-              helper="Tanpa kacamata hitam atau penutup wajah."
-            />
-            <div className="flex justify-between pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(1)}
-              >
-                ← Kembali
-              </Button>
-              <Button
-                type="button"
-                disabled={!selfiePath}
-                onClick={() => setStep(3)}
-              >
-                Lanjut ke Video Casting →
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Step 3: Video Casting */}
-      {step === 3 && (
-        <Card className="border-slate-200/90 shadow-2xs">
-          <CardHeader className="bg-slate-50/50">
-            <CardTitle>Langkah 3: Unggah Video Casting (±20 Detik)</CardTitle>
-            <p className="text-xs text-slate-500 mt-1">
-              Browser akan mengekstrak frame secara otomatis untuk face match instan tanpa membebani kuota Anda.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-5">
-            <VideoCastingUploader
-              onUploaded={(data) => setVideoData(data)}
-            />
-            <div className="flex justify-between pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(2)}
-              >
-                ← Kembali
-              </Button>
-              <Button
-                type="button"
-                disabled={!videoData}
-                onClick={() => setStep(4)}
-              >
-                Lanjut ke Konfirmasi →
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Step 4: Confirmation & Submission */}
-      {step === 4 && (
-        <Card className="border-slate-200/90 shadow-2xs">
-          <CardHeader className="bg-slate-50/50">
-            <CardTitle>Langkah 4: Konfirmasi Berkas & Kirim</CardTitle>
-            <p className="text-xs text-slate-500 mt-1">
-              Periksa kelengkapan dokumen sebelum diserahkan ke antrean verifikasi reviewer.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-5">
-            <div className="p-4 bg-slate-50 rounded-xl space-y-2.5 text-xs border border-slate-100">
-              <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                <span className="text-slate-600 font-medium">1. Berkas Foto KTP:</span>
-                <span className={ktpPath ? "text-emerald-700 font-bold" : "text-rose-600"}>
-                  {ktpPath ? "✓ Berhasil Terunggah" : "Belum diunggah"}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                <span className="text-slate-600 font-medium">2. Foto Selfie Wajah:</span>
-                <span className={selfiePath ? "text-emerald-700 font-bold" : "text-rose-600"}>
-                  {selfiePath ? "✓ Berhasil Terunggah" : "Belum diunggah"}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-600 font-medium">3. Video Casting & Frame:</span>
-                <span className={videoData ? "text-emerald-700 font-bold" : "text-rose-600"}>
-                  {videoData ? `✓ Siap (${videoData.durationSec}s, ${videoData.framePaths.length} frame JPEG)` : "Belum diunggah"}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex justify-between pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setStep(3)}
-              >
-                ← Kembali
-              </Button>
-              <Button
-                type="button"
-                isLoading={submitting}
-                disabled={!ktpPath || !selfiePath || !videoData}
-                onClick={handleSubmit}
-                className="shadow-md"
-              >
-                Kirim Pengajuan Verifikasi Sekarang
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+    <VerificationForm
+      lastRejectionNote={status === "REJECTED" ? latestVerif?.reviewNote : null}
+    />
   );
 }
