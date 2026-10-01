@@ -73,18 +73,15 @@ export function ImageUploader({
       });
 
       if (!uploadRes.ok) {
-        // Fallback for mock upload if local without storage server
-        console.warn("Storage upload status:", uploadRes.status);
+        throw new Error(`Gagal menyimpan file ke server (Status: ${uploadRes.status}). Silakan coba lagi.`);
       }
 
       setUploadedPath(res.path);
       onUploaded(res.path);
     } catch (err: any) {
       console.error("Upload error:", err);
-      // For mock resilience during local testing:
-      const mockPath = `mock/${bucket}/${file.name}`;
-      setUploadedPath(mockPath);
-      onUploaded(mockPath);
+      setError(err?.message || "Gagal mengunggah foto ke server. Pastikan koneksi internet stabil dan coba lagi.");
+      setUploadedPath(null);
     } finally {
       setUploading(false);
     }

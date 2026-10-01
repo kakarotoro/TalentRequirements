@@ -149,29 +149,39 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
                   className="w-full h-full object-contain bg-slate-900/5"
                 />
               ) : (
-                <div className="p-4 flex flex-col items-center justify-center">
-                  <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                  </svg>
-                  <span className="text-[11px] font-mono text-slate-600 break-all">
-                    {verification.ktpPath}
+                <div className="p-4 flex flex-col items-center justify-center text-center">
+                  <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-bold text-amber-800">
+                    Berkas Fisik Belum Tersimpan
                   </span>
-                  <span className="text-[10px] text-slate-400 mt-1">Dokumen KTP Terdaftar</span>
+                  <span className="text-[10px] text-amber-700 mt-1 leading-snug">
+                    Terunggah sebelum sistem storage aktif. Silakan tolak (reject) agar talent mengunggah ulang.
+                  </span>
                 </div>
               )}
             </div>
 
-            <a
-              href={`/api/admin/download?bucket=ktp&path=${encodeURIComponent(verification.ktpPath)}&filename=KTP_${talent.fullName.replace(/\s+/g, '_')}.jpg`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors shadow-2xs"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Download Dokumen KTP
-            </a>
+            {verification.ktpPath.startsWith("mock/") ? (
+              <div className="mt-3 p-2 rounded-xl text-center text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200">
+                ⚠️ File fisik tidak tersedia di server
+              </div>
+            ) : (
+              <a
+                href={`/api/admin/download?bucket=ktp&path=${encodeURIComponent(verification.ktpPath)}&filename=KTP_${talent.fullName.replace(/\s+/g, '_')}.jpg`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors shadow-2xs"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Dokumen KTP
+              </a>
+            )}
           </CardContent>
         </Card>
 
@@ -201,29 +211,39 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="p-4 flex flex-col items-center justify-center">
-                  <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  <span className="text-[11px] font-mono text-slate-600 break-all">
-                    {verification.selfiePath}
+                <div className="p-4 flex flex-col items-center justify-center text-center">
+                  <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <span className="text-xs font-bold text-amber-800">
+                    Foto Selfie Belum Tersimpan
                   </span>
-                  <span className="text-[10px] text-slate-400 mt-1">Foto Selfie Referensi</span>
+                  <span className="text-[10px] text-amber-700 mt-1 leading-snug">
+                    Terunggah sebelum sistem storage aktif.
+                  </span>
                 </div>
               )}
             </div>
 
-            <a
-              href={`/api/admin/download?bucket=selfies&path=${encodeURIComponent(verification.selfiePath)}&filename=Foto_${talent.fullName.replace(/\s+/g, '_')}.jpg`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-2xs"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Download Foto Selfie
-            </a>
+            {verification.selfiePath.startsWith("mock/") ? (
+              <div className="mt-3 p-2 rounded-xl text-center text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200">
+                ⚠️ File fisik tidak tersedia di server
+              </div>
+            ) : (
+              <a
+                href={`/api/admin/download?bucket=selfies&path=${encodeURIComponent(verification.selfiePath)}&filename=Foto_${talent.fullName.replace(/\s+/g, '_')}.jpg`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-2xs"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Foto Selfie
+              </a>
+            )}
           </CardContent>
         </Card>
 
@@ -354,6 +374,13 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
                 className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
               >
                 ⚠️ Wajah Tidak Cocok
+              </button>
+              <button
+                type="button"
+                onClick={() => setNote("Berkas fisik KTP belum tersimpan di server karena kendala sistem saat Anda submit. Mohon unggah ulang foto KTP asli Anda.")}
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-800 font-semibold transition-colors"
+              >
+                ⚠️ Minta Upload Ulang KTP
               </button>
             </div>
           </div>

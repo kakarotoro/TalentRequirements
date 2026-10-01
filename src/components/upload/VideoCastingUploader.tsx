@@ -122,11 +122,15 @@ export function VideoCastingUploader({
         throw new Error(videoUploadRes.error || "Gagal mendapatkan URL upload video");
       }
 
-      await fetch(videoUploadRes.signedUrl, {
+      const uploadVideoFetch = await fetch(videoUploadRes.signedUrl, {
         method: "PUT",
         headers: { "Content-Type": file.type },
         body: file,
       });
+
+      if (!uploadVideoFetch.ok) {
+        throw new Error(`Gagal menyimpan video ke server (Status: ${uploadVideoFetch.status}). Silakan coba lagi.`);
+      }
 
       // 2. Upload extracted frames
       const framePaths: string[] = [];
@@ -142,12 +146,14 @@ export function VideoCastingUploader({
         });
 
         if (frameUpload.success && frameUpload.path) {
-          await fetch(frameUpload.signedUrl, {
+          const frameRes = await fetch(frameUpload.signedUrl, {
             method: "PUT",
             headers: { "Content-Type": "image/jpeg" },
             body: blob,
           });
-          framePaths.push(frameUpload.path);
+          if (frameRes.ok) {
+            framePaths.push(frameUpload.path);
+          }
         }
       }
 
@@ -162,17 +168,8 @@ export function VideoCastingUploader({
       });
     } catch (err: any) {
       console.error("Video upload error:", err);
-      // Mock data for development fallback
-      const mockResult: VideoCastingData = {
-        storagePath: `mock/videos/${file.name}`,
-        framePaths: ["mock/videos/frame1.jpg", "mock/videos/frame2.jpg"],
-        durationSec: Math.round(duration || 20),
-        width: dimensions.width || 1080,
-        height: dimensions.height || 1920,
-        sizeBytes: file.size,
-      };
-      setUploaded(true);
-      onUploaded(mockResult);
+      setError(err?.message || "Gagal mengunggah video ke server. Pastikan koneksi internet stabil dan coba lagi.");
+      setUploaded(false);
     } finally {
       setUploading(false);
     }

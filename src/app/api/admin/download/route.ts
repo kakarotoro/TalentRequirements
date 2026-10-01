@@ -17,32 +17,41 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Missing bucket or path", { status: 400 });
   }
 
+  // If mock path from legacy upload before storage bucket creation
+  if (path.startsWith("mock/")) {
+    const htmlError = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Berkas Fisik Belum Tersimpan</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f8fafc; color: #1e293b; }
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; max-width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; }
+    .icon { width: 56px; height: 56px; border-radius: 50%; background: #fef2f2; color: #dc2626; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; }
+    h2 { margin: 0 0 8px; font-size: 18px; color: #0f172a; }
+    p { margin: 0 0 20px; font-size: 13px; line-height: 1.6; color: #64748b; }
+    .badge { display: inline-block; padding: 4px 12px; background: #f1f5f9; border-radius: 8px; font-family: monospace; font-size: 12px; color: #334155; margin-bottom: 20px; }
+    .btn { display: inline-block; padding: 10px 20px; background: #2563eb; color: white; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">⚠️</div>
+    <h2>Berkas Fisik Belum Tersimpan di Server</h2>
+    <p>Berkas ini berstatus path lokal (<code>${path}</code>) yang tersimpan sebelum sistem bucket storage Supabase diaktifkan. File fisik aslinya tidak tersimpan di server.</p>
+    <div class="badge">Nama: ${filename}</div><br/>
+    <p style="font-size: 12px; color: #475569;">Solusi: Silakan <b>Tolak (Reject)</b> pengajuan talent ini dengan catatan meminta unggah ulang foto KTP asli.</p>
+    <a href="javascript:window.close()" class="btn">Tutup Jendela</a>
+  </div>
+</body>
+</html>`;
+    return new NextResponse(htmlError, {
+      status: 404,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  }
+
   try {
-    if (path.startsWith("mock/")) {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
-        <rect width="800" height="500" fill="#f8fafc" stroke="#cbd5e1" stroke-width="4"/>
-        <rect x="40" y="40" width="720" height="420" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
-        <circle cx="120" cy="120" r="40" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
-        <text x="120" y="128" font-family="sans-serif" font-size="28" font-weight="bold" fill="#1d4ed8" text-anchor="middle">SHP</text>
-        <text x="180" y="115" font-family="sans-serif" font-size="22" font-weight="bold" fill="#0f172a">DOKUMEN VERIFIKASI TALENT</text>
-        <text x="180" y="140" font-family="sans-serif" font-size="14" fill="#64748b">SHP Entertainment SPG &amp; Usher Recruitment</text>
-        <line x1="60" y1="180" x2="740" y2="180" stroke="#f1f5f9" stroke-width="2"/>
-        <text x="60" y="240" font-family="sans-serif" font-size="16" font-weight="bold" fill="#334155">Nama Berkas:</text>
-        <text x="220" y="240" font-family="sans-serif" font-size="16" fill="#0284c7">${filename}</text>
-        <text x="60" y="290" font-family="sans-serif" font-size="16" font-weight="bold" fill="#334155">Lokasi Sistem:</text>
-        <text x="220" y="290" font-family="monospace" font-size="14" fill="#475569">${path}</text>
-        <text x="60" y="340" font-family="sans-serif" font-size="16" font-weight="bold" fill="#334155">Status Upload:</text>
-        <text x="220" y="340" font-family="sans-serif" font-size="15" fill="#16a34a">Tersimpan dalam sistem verifikasi</text>
-      </svg>`;
-
-      return new NextResponse(svg, {
-        headers: {
-          "Content-Type": "image/svg+xml",
-          "Content-Disposition": `attachment; filename="${filename.replace(/\.[^.]+$/, "")}.svg"`,
-        },
-      });
-    }
-
     const buffer = await getFileBuffer(bucket, path);
     const ext = path.split(".").pop()?.toLowerCase() || "jpg";
     const mimeTypes: Record<string, string> = {
@@ -63,20 +72,32 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
-    // If not found in storage, fallback to SVG info card download so user never gets broken link
-    const fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
-      <rect width="800" height="500" fill="#f8fafc" stroke="#cbd5e1" stroke-width="4"/>
-      <rect x="40" y="40" width="720" height="420" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
-      <text x="400" y="200" font-family="sans-serif" font-size="22" font-weight="bold" fill="#0f172a" text-anchor="middle">BERKAS DOKUMEN: ${filename}</text>
-      <text x="400" y="250" font-family="sans-serif" font-size="14" fill="#64748b" text-anchor="middle">File path: ${path}</text>
-      <text x="400" y="290" font-family="sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">SHP Entertainment Recruitment System</text>
-    </svg>`;
-
-    return new NextResponse(fallbackSvg, {
-      headers: {
-        "Content-Type": "image/svg+xml",
-        "Content-Disposition": `attachment; filename="${filename.replace(/\.[^.]+$/, "")}.svg"`,
-      },
+    const htmlNotFound = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <title>Berkas Tidak Ditemukan</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f8fafc; color: #1e293b; }
+    .card { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; max-width: 480px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; }
+    .icon { width: 56px; height: 56px; border-radius: 50%; background: #fff7ed; color: #ea580c; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; }
+    h2 { margin: 0 0 8px; font-size: 18px; color: #0f172a; }
+    p { margin: 0 0 20px; font-size: 13px; line-height: 1.6; color: #64748b; }
+    .btn { display: inline-block; padding: 10px 20px; background: #2563eb; color: white; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🔍</div>
+    <h2>Berkas Tidak Ditemukan di Storage</h2>
+    <p>File <code>${path}</code> tidak ditemukan pada bucket <code>${bucket}</code> di server Supabase.</p>
+    <a href="javascript:window.close()" class="btn">Tutup Jendela</a>
+  </div>
+</body>
+</html>`;
+    return new NextResponse(htmlNotFound, {
+      status: 404,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
     });
   }
 }

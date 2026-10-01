@@ -183,18 +183,27 @@ export default async function AdminTalentsPage({
                       {latestVerif ? (
                         <div className="flex items-center justify-end gap-1.5 flex-wrap">
                           {latestVerif.ktpPath && (
-                            <a
-                              href={`/api/admin/download?bucket=ktp&path=${encodeURIComponent(latestVerif.ktpPath)}&filename=KTP_${t.fullName.replace(/\s+/g, '_')}.jpg`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors shadow-2xs"
-                              title="Download Dokumen KTP Talent"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                              </svg>
-                              KTP
-                            </a>
+                            latestVerif.ktpPath.startsWith("mock/") ? (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200"
+                                title="Berkas fisik belum tersimpan di server (terunggah sebelum storage aktif)"
+                              >
+                                ⚠️ Belum Tersimpan
+                              </span>
+                            ) : (
+                              <a
+                                href={`/api/admin/download?bucket=ktp&path=${encodeURIComponent(latestVerif.ktpPath)}&filename=KTP_${t.fullName.replace(/\s+/g, '_')}.jpg`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors shadow-2xs"
+                                title="Download Dokumen KTP Talent"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                KTP
+                              </a>
+                            )
                           )}
                           {latestVerif.selfiePath && (
                             <a
