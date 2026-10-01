@@ -6,6 +6,7 @@ import { reviewVerificationAction } from "@/server/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getStoragePublicUrl } from "@/lib/storage";
 
 interface ReviewPanelProps {
   verification: {
@@ -139,15 +140,38 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
             </div>
           </CardHeader>
           <CardContent className="p-4 flex-1 flex flex-col justify-between">
-            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 border border-slate-200 text-center">
-              <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-              <span className="text-[11px] font-mono text-slate-600 break-all">
-                {verification.ktpPath}
-              </span>
-              <span className="text-[10px] text-slate-400 mt-1">Enkripsi AES-256 Terlindungi</span>
+            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center border border-slate-200 text-center relative group">
+              {verification.ktpPath && !verification.ktpPath.startsWith("mock/") ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={getStoragePublicUrl("ktp", verification.ktpPath)}
+                  alt="KTP Talent"
+                  className="w-full h-full object-contain bg-slate-900/5"
+                />
+              ) : (
+                <div className="p-4 flex flex-col items-center justify-center">
+                  <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  <span className="text-[11px] font-mono text-slate-600 break-all">
+                    {verification.ktpPath}
+                  </span>
+                  <span className="text-[10px] text-slate-400 mt-1">Dokumen KTP Terdaftar</span>
+                </div>
+              )}
             </div>
+
+            <a
+              href={`/api/admin/download?bucket=ktp&path=${encodeURIComponent(verification.ktpPath)}&filename=KTP_${talent.fullName.replace(/\s+/g, '_')}.jpg`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-xs font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors shadow-2xs"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download Dokumen KTP
+            </a>
           </CardContent>
         </Card>
 
@@ -168,15 +192,38 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
             </div>
           </CardHeader>
           <CardContent className="p-4 flex-1 flex flex-col justify-between">
-            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 border border-slate-200 text-center">
-              <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span className="text-[11px] font-mono text-slate-600 break-all">
-                {verification.selfiePath}
-              </span>
-              <span className="text-[10px] text-slate-400 mt-1">Rekognition Face Compare Reference</span>
+            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center border border-slate-200 text-center relative group">
+              {verification.selfiePath && !verification.selfiePath.startsWith("mock/") ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={getStoragePublicUrl("selfies", verification.selfiePath)}
+                  alt="Foto Selfie Talent"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="p-4 flex flex-col items-center justify-center">
+                  <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <span className="text-[11px] font-mono text-slate-600 break-all">
+                    {verification.selfiePath}
+                  </span>
+                  <span className="text-[10px] text-slate-400 mt-1">Foto Selfie Referensi</span>
+                </div>
+              )}
             </div>
+
+            <a
+              href={`/api/admin/download?bucket=selfies&path=${encodeURIComponent(verification.selfiePath)}&filename=Foto_${talent.fullName.replace(/\s+/g, '_')}.jpg`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-2xs"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download Foto Selfie
+            </a>
           </CardContent>
         </Card>
 
@@ -196,7 +243,7 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
             </div>
           </CardHeader>
           <CardContent className="p-4 flex-1 flex flex-col justify-between">
-            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center p-4 border border-slate-200 text-center">
+            <div className="aspect-[4/3] bg-slate-100 rounded-xl overflow-hidden flex flex-col items-center justify-center border border-slate-200 text-center relative group p-4">
               <svg className="w-10 h-10 text-slate-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -206,6 +253,20 @@ export function ReviewPanel({ verification }: ReviewPanelProps) {
               </span>
               <span className="text-[10px] text-slate-400 mt-1">Liveness Video Verification</span>
             </div>
+
+            {video?.storagePath && (
+              <a
+                href={`/api/admin/download?bucket=videos&path=${encodeURIComponent(video.storagePath)}&filename=Video_${talent.fullName.replace(/\s+/g, '_')}.mp4`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-colors shadow-2xs"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Video
+              </a>
+            )}
           </CardContent>
         </Card>
       </div>

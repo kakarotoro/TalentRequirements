@@ -81,3 +81,14 @@ export async function getFileBuffer(
   const arrayBuffer = await data.arrayBuffer();
   return Buffer.from(arrayBuffer);
 }
+
+/**
+ * Get public URL for a file in Supabase storage.
+ */
+export function getStoragePublicUrl(bucket: StorageBucket | string, path: string): string {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ywjsutaqoeoaqopzrehl.supabase.co";
+  const supabaseUrl = rawUrl.replace(/\/+$/, "");
+  return `${supabaseUrl}/storage/v1/object/public/${bucket}/${path}`;
+}
